@@ -2,8 +2,11 @@
 
 ## Main Showcase Visual
 
+- `deliverables/map_plates/houston_311_service_burden_map_plate.png` - formal static GIS map plate for the project.
 - `outputs/maps/council_district_service_burden_choropleth.png` - the primary portfolio visual. It ranks council districts by the V3 service-burden score and includes top driver notes.
-- `index.html` - interactive static showcase that uses the main map, supporting maps, and district tables.
+- `deliverables/static_gis_report.md` - static GIS report.
+- `deliverables/map_atlas.md` - atlas index for map and figure outputs.
+- `index.html` - optional viewer that uses the main map, supporting maps, and district tables.
 
 ## Supporting Maps
 

@@ -19,3 +19,5 @@ jobs:
         run: python -m unittest discover -s tests
       - name: Compile Python scripts
         run: python -m compileall scripts tests
+      - name: Generate static GIS deliverables
+        run: python scripts/make_deliverables.py

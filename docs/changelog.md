@@ -1,5 +1,13 @@
 # Changelog
 
+## V3.2
+
+- Reframed the project around static GIS analysis and map production.
+- Added `deliverables/` with a formal map plate, static GIS report, and map atlas.
+- Added `metadata/` with project metadata, source-layer notes, and processing lineage.
+- Added cartographic methodology and geoprocessing workflow documentation.
+- Added `scripts/make_deliverables.py` and wired it into the reproducible pipeline.
+
 ## V3.1
 
 - Added a root `index.html` interactive static showcase for GitHub Pages.

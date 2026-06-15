@@ -12,6 +12,9 @@ TABLES = OUTPUTS / "tables"
 FIGURES = OUTPUTS / "figures"
 MAPS = OUTPUTS / "maps"
 DOCS = ROOT / "docs"
+DELIVERABLES = ROOT / "deliverables"
+MAP_PLATES = DELIVERABLES / "map_plates"
+METADATA = ROOT / "metadata"
 
 ARCHIVE_LAYER_URL = (
     "https://mycity2.houstontx.gov/gisweb01/rest/services/311/"
@@ -117,5 +120,17 @@ CANVAS = {
 
 
 def ensure_directories() -> None:
-    for path in [CONFIG_DIR, DATA_RAW, DATA_PROCESSED, DATA_CONTEXT, TABLES, FIGURES, MAPS, DOCS]:
+    for path in [
+        CONFIG_DIR,
+        DATA_RAW,
+        DATA_PROCESSED,
+        DATA_CONTEXT,
+        TABLES,
+        FIGURES,
+        MAPS,
+        DOCS,
+        DELIVERABLES,
+        MAP_PLATES,
+        METADATA,
+    ]:
         path.mkdir(parents=True, exist_ok=True)

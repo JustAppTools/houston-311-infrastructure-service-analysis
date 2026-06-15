@@ -1,18 +1,18 @@
 # Houston 311 Infrastructure Service Request Analysis
 
-Portfolio-ready GIS and data analysis of Houston 311 infrastructure-related service requests, resolution times, repeat-location clusters, unresolved cases, and council-district service burden.
+Portfolio-ready static GIS analysis of Houston 311 infrastructure-related service requests, resolution times, repeat-location clusters, unresolved cases, and council-district service burden.
 
-The repository's primary showcase artifact is the council-district service-burden map:
+The repository's primary showcase artifact is the static GIS service-burden map plate:
 
-![Council district service burden choropleth](outputs/maps/council_district_service_burden_choropleth.png)
+![Council district service burden map plate](deliverables/map_plates/houston_311_service_burden_map_plate.png)
 
 ## Project Overview
 
-This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a technical analysis package with a static interactive showcase: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, GitHub Pages-ready HTML, and public-sector documentation.
+This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a static GIS map-production package: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, formal map deliverables, metadata, and public-sector documentation.
 
 **Research question:** Which Houston areas show the highest infrastructure-service burden based on request volume, issue type, resolution time, unresolved cases, long-resolution cases, and recurring request clusters?
 
-The project is designed to be understandable as a public-sector analytics case study: the code can be rerun, the assumptions are documented, and the main visual can be used directly in a portfolio or project write-up.
+The project is designed to be understandable as a public-sector GIS case study: the code can be rerun, the assumptions are documented, and the static map/report products can be used directly in a portfolio or project write-up.
 
 ## V3 Data Scope
 
@@ -45,15 +45,28 @@ The score is not an official City of Houston metric, not a causal model, and not
 
 These are analytical findings from a bounded public-data extract, not official City performance measures.
 
-## Showcase Outputs
+## Static GIS Deliverables
+
+### Formal Map Plate
+
+![Council district service burden map plate](deliverables/map_plates/houston_311_service_burden_map_plate.png)
+
+- [Static GIS report](deliverables/static_gis_report.md)
+- [Static map atlas](deliverables/map_atlas.md)
+- [Project metadata](metadata/project_metadata.md)
+- [Processing lineage](metadata/processing_lineage.md)
+- [Cartographic methodology](docs/cartographic_methodology.md)
+- [Geoprocessing workflow](docs/geoprocessing_workflow.md)
+
+## Supporting Outputs
 
 ### Main Map
 
 ![Council district service burden choropleth](outputs/maps/council_district_service_burden_choropleth.png)
 
-### Interactive Showcase
+### Optional Viewer
 
-Open [`index.html`](index.html) locally through a small static server, or use the GitHub Pages workflow included in `.github/workflows/pages.yml`.
+The repository includes [`index.html`](index.html) as a lightweight viewer for committed map/table artifacts. It is not the core deliverable; the project is framed around static GIS maps, documentation, and map plates.
 
 ### Supporting Visuals
 
@@ -100,6 +113,12 @@ Reuse both the 311 extract and existing context files:
 python scripts/run_all.py --skip-fetch --skip-context
 ```
 
+Regenerate only static GIS deliverables:
+
+```bash
+python scripts/make_deliverables.py
+```
+
 Run tests:
 
 ```bash
@@ -138,6 +157,10 @@ The same settings are read by the scripts, so scoring changes can be made in one
 |-- .github/
 |-- config/
 |   `-- analysis_config.json
+|-- deliverables/
+|   |-- map_plates/
+|   |-- map_atlas.md
+|   `-- static_gis_report.md
 |-- data/
 |   |-- raw/
 |   |-- processed/
@@ -153,7 +176,13 @@ The same settings are read by the scripts, so scoring changes can be made in one
 |   |-- project_brief.md
 |   |-- presentation_outline.md
 |   |-- future_work.md
+|   |-- cartographic_methodology.md
+|   |-- geoprocessing_workflow.md
 |   `-- portfolio_page.html
+|-- metadata/
+|   |-- project_metadata.md
+|   |-- source_layers.md
+|   `-- processing_lineage.md
 |-- outputs/
 |   |-- maps/
 |   |-- figures/
@@ -176,7 +205,8 @@ The same settings are read by the scripts, so scoring changes can be made in one
 - Repeat-location cluster screening
 - Official council-district choropleth mapping
 - Static chart and map production
-- Static interactive showcase design
+- Static GIS map plate and atlas production
+- GIS metadata and processing-lineage documentation
 - GitHub Actions CI and Pages deployment
 - Public-sector technical writing and limitations documentation
 

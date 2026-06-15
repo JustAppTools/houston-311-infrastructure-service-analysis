@@ -18,3 +18,9 @@
 - Add category-specific burden scores.
 - Add confidence or data-quality notation to every district ranking.
 - Move large generated datasets to GitHub Releases if repository size becomes a concern.
+
+## Static GIS Presentation Enhancements
+
+- Export the Markdown report to a paginated PDF after a visual QA pass.
+- Add a second formal map plate for repeat-location clusters.
+- Add static small-multiple plates for unresolved share, long-resolution share, and repeat-cluster share.

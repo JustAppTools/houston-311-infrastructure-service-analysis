@@ -1,5 +1,9 @@
 # Technical Memo: Houston 311 Infrastructure Service Request Analysis
 
+## V3.2 Static GIS Update
+
+The project is now framed as a static GIS map-production package. The core deliverables are the formal map plate, static GIS report, map atlas, metadata files, cartographic methodology, and geoprocessing workflow documentation. The optional `index.html` viewer remains in the repository, but it is not the central analytical product.
+
 ## V3.1 Showcase Update
 
 The repository now includes a root `index.html` static showcase, GitHub Actions CI, a GitHub Pages deployment workflow, pinned dependencies, and a district-level data-quality table. These additions improve presentation, repeatability, and repository maintainability without changing the core V3 burden-score method.

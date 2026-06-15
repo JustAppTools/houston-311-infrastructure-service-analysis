@@ -1,4 +1,4 @@
-.PHONY: all fetch clean analyze maps test compile pages-ready
+.PHONY: all fetch clean analyze maps deliverables test compile pages-ready
 
 PYTHON ?= python
 
@@ -19,6 +19,9 @@ analyze:
 
 maps:
 	$(PYTHON) scripts/make_maps.py
+
+deliverables:
+	$(PYTHON) scripts/make_deliverables.py
 
 test:
 	$(PYTHON) -m unittest discover -s tests
