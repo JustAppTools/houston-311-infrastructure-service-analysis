@@ -122,7 +122,7 @@ def feature_label_point(feature: dict) -> tuple[float, float]:
 
 def save_bar_chart(data: pd.DataFrame, label_col: str, value_col: str, title: str, path: Path, suffix: str = "") -> None:
     data = data.head(10).iloc[::-1]
-    img, draw = canvas(title, "City of Houston 311 archive extract; V2 infrastructure categories")
+    img, draw = canvas(title, "City of Houston 311 archive extract; V3 infrastructure categories")
     left, top, right, bottom = 410, 145, CANVAS["width"] - 120, CANVAS["height"] - 90
     max_value = max(float(data[value_col].max()), 1)
     bar_h = max(28, (bottom - top) // max(len(data), 1) - 12)
@@ -148,7 +148,7 @@ def save_share_chart(data: pd.DataFrame, title: str, path: Path) -> None:
 
 def save_month_chart(df: pd.DataFrame, path: Path) -> None:
     monthly = df.groupby("month").size().reset_index(name="request_count").sort_values("month")
-    img, draw = canvas("Monthly Request Volume", "Infrastructure-related Houston 311 requests in the V2 extract")
+    img, draw = canvas("Monthly Request Volume", "Infrastructure-related Houston 311 requests in the V3 extract")
     left, top, right, bottom = 140, 170, CANVAS["width"] - 110, CANVAS["height"] - 120
     if len(monthly) < 2:
         draw.text((left, top), "The extract covers one month, so a trend line is not interpreted.", fill=CANVAS["ink"], font=font(24, True))
@@ -210,7 +210,10 @@ def draw_map(df: pd.DataFrame, title: str, path: Path, color: tuple[int, int, in
 def draw_burden_map(df: pd.DataFrame, path: Path) -> None:
     area_path = TABLES / "council_district_service_burden.csv"
     driver_path = TABLES / "district_burden_drivers.csv"
-    img, draw = canvas("Houston 311 Infrastructure Burden by Council District", "Official council district polygons; score combines density, resolution, unresolved, long-resolution, and repeat-cluster metrics")
+    img, draw = canvas(
+        "Houston 311 Infrastructure Burden by Council District",
+        "April-June 2025; score uses ACS rates when available, otherwise area density, plus resolution/open/repeat metrics",
+    )
     left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
     draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
     geo = valid_geo(df)
@@ -223,7 +226,18 @@ def draw_burden_map(df: pd.DataFrame, path: Path) -> None:
     area_by_district = {str(row["council_district"]): row for _, row in area.iterrows()}
     extent = boundary_extent(boundaries, geo)
     project = make_projector(extent, (left, top, right - 330, bottom))
-    colors = {"Low": (137, 171, 112), "Medium": (220, 185, 101), "High": (210, 121, 84), "Very High": (160, 69, 88)}
+    colors = {
+        "Low": (137, 171, 112),
+        "Medium": (220, 185, 101),
+        "High": (210, 121, 84),
+        "Very High": (148, 49, 73),
+    }
+    legend_labels = {
+        "Low": "Low (<25)",
+        "Medium": "Medium (25-49)",
+        "High": "High (50-74)",
+        "Very High": "Very High (75+)",
+    }
     for feature in boundaries.get("features", []):
         district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
         row = area_by_district.get(district)
@@ -241,7 +255,7 @@ def draw_burden_map(df: pd.DataFrame, path: Path) -> None:
     for i, (label, fill) in enumerate(colors.items()):
         y = top + 24 + i * 34
         draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
-        draw.text((legend_x + 34, y - 1), label, fill=CANVAS["ink"], font=font(18))
+        draw.text((legend_x + 34, y - 1), legend_labels[label], fill=CANVAS["ink"], font=font(18))
     draw.text((legend_x, top + 180), "Top Drivers", fill=CANVAS["ink"], font=font(22, True))
     if driver_path.exists():
         drivers = pd.read_csv(driver_path).head(5)
@@ -249,16 +263,30 @@ def draw_burden_map(df: pd.DataFrame, path: Path) -> None:
         for _, row in drivers.iterrows():
             district = row["council_district"]
             score = row["service_burden_score"]
-            density = area_by_district[str(district)]["requests_per_sq_mile"]
-            top_cat = str(row["top_category"]).replace(" / ", "/")
+            district_metrics = area_by_district[str(district)]
+            resident_rate = district_metrics.get("requests_per_10k_residents")
+            density = district_metrics.get("requests_per_sq_mile")
+            unresolved = district_metrics.get("unresolved_share", 0) * 100
+            repeat = district_metrics.get("repeat_cluster_share", 0) * 100
+            top_cat = str(row["top_category"]).replace("Solid Waste / Recycling", "Solid Waste").replace("Traffic Signals / Lighting", "Signals").replace("Road / Pothole / Bridge", "Roads").replace(" / ", "/")
             line1 = f"{district}: {score:.1f} score"
-            line2 = f"{density:,.0f}/sq mi; {top_cat[:22]}"
+            if pd.notna(resident_rate):
+                line2 = f"{resident_rate:,.0f}/10k res; {unresolved:.0f}% open"
+            else:
+                line2 = f"{density:,.0f}/sq mi; {unresolved:.0f}% open"
+            line3 = f"{repeat:.0f}% repeat; {top_cat[:16]}"
             draw.text((legend_x, y), line1, fill=CANVAS["ink"], font=font(18, True))
             draw.text((legend_x, y + 24), line2, fill=CANVAS["muted"], font=font(15))
-            y += 62
+            draw.text((legend_x, y + 44), line3, fill=CANVAS["muted"], font=font(15))
+            y += 78
     draw.polygon([(left + 20, bottom - 80), (left + 20, bottom - 28), (left + 35, bottom - 58)], fill=CANVAS["ink"])
     draw.text((left + 42, bottom - 68), "N", fill=CANVAS["ink"], font=font(19, True))
-    draw.text((left, bottom + 22), "Boundary source: COHGIS/Harris County CoH_Boundaries service. Not population-normalized.", fill=CANVAS["muted"], font=font(16))
+    draw.text(
+        (left, bottom + 22),
+        "Sources: City of Houston 311 Archive; COHGIS council districts; 2024 ACS if accessible. Analytical score, not an official City metric.",
+        fill=CANVAS["muted"],
+        font=font(15),
+    )
     img.save(path)
 
 
@@ -285,6 +313,84 @@ def draw_repeat_cluster_map(df: pd.DataFrame, path: Path) -> None:
     img.save(path)
 
 
+def draw_thematic_choropleth(theme: str, title: str, path: Path) -> None:
+    table_path = TABLES / "thematic_district_burden.csv"
+    if not table_path.exists():
+        return
+    data = pd.read_csv(table_path)
+    data = data[data["theme"] == theme].copy()
+    if data.empty:
+        return
+    boundaries = load_boundaries()
+    value_field = (
+        "requests_per_10k_residents"
+        if data["requests_per_10k_residents"].notna().any()
+        else "requests_per_sq_mile"
+    )
+    unit_label = "requests per 10,000 residents" if value_field == "requests_per_10k_residents" else "requests per square mile"
+    img, draw = canvas(title, f"{unit_label.title()} by council district; April-June 2025")
+    left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
+    draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
+    if not boundaries:
+        draw.text((left + 40, top + 40), "No boundary data available.", fill=CANVAS["ink"], font=font(24, True))
+        img.save(path)
+        return
+    extent = boundary_extent(boundaries, pd.DataFrame({"longitude": [-95.8], "latitude": [29.8]}))
+    project = make_projector(extent, (left, top, right - 300, bottom))
+    values = data[value_field].fillna(0)
+    q1, q2, q3 = values.quantile([0.25, 0.5, 0.75])
+    ramp = [(220, 229, 213), (183, 203, 164), (213, 151, 105), (148, 49, 73)]
+
+    def color_for(value: float):
+        if value <= q1:
+            return ramp[0]
+        if value <= q2:
+            return ramp[1]
+        if value <= q3:
+            return ramp[2]
+        return ramp[3]
+
+    by_district = {str(row["council_district"]): row for _, row in data.iterrows()}
+    for feature in boundaries.get("features", []):
+        district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
+        row = by_district.get(district)
+        value = float(row[value_field]) if row is not None else 0
+        for ring in iter_rings(feature.get("geometry", {})):
+            pts = [project(lon, lat) for lon, lat in ring]
+            if len(pts) >= 3:
+                draw.polygon(pts, fill=color_for(value), outline=(255, 255, 255))
+                draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
+        lon, lat = feature_label_point(feature)
+        x, y = project(lon, lat)
+        draw.ellipse((x - 13, y - 13, x + 13, y + 13), fill=(255, 255, 255), outline=(75, 82, 82), width=1)
+        draw.text((x - 6, y - 10), district, fill=CANVAS["ink"], font=font(17, True))
+
+    legend_x = right - 265
+    draw.text((legend_x, top + 24), "Rate Quartiles", fill=CANVAS["ink"], font=font(21, True))
+    labels = [
+        f"<= {q1:,.0f}",
+        f"{q1:,.0f}-{q2:,.0f}",
+        f"{q2:,.0f}-{q3:,.0f}",
+        f"> {q3:,.0f}",
+    ]
+    for i, (fill, label) in enumerate(zip(ramp, labels)):
+        y = top + 64 + i * 34
+        draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
+        draw.text((legend_x + 34, y - 1), label, fill=CANVAS["ink"], font=font(18))
+    top_rows = data.sort_values(value_field, ascending=False).head(4)
+    draw.text((legend_x, top + 230), "Highest Rates", fill=CANVAS["ink"], font=font(21, True))
+    y = top + 268
+    for _, row in top_rows.iterrows():
+        draw.text(
+            (legend_x, y),
+            f"{row['council_district']}: {row[value_field]:,.0f}" + ("/10k" if value_field == "requests_per_10k_residents" else "/sq mi"),
+            fill=CANVAS["ink"],
+            font=font(17, True),
+        )
+        y += 32
+    img.save(path)
+
+
 def main() -> None:
     ensure_directories()
     if not CLEAN_FILE.exists():
@@ -308,6 +414,21 @@ def main() -> None:
     draw_map(df[(df["is_open"].astype(str).str.lower() == "true") | (df["is_long_resolution"].astype(str).str.lower() == "true")], "Open or Long-Resolution Requests", MAPS / "open_or_long_resolution_requests.png", PALETTE[3])
     draw_burden_map(df, MAPS / "council_district_service_burden_choropleth.png")
     draw_repeat_cluster_map(df, MAPS / "repeat_location_clusters.png")
+    draw_thematic_choropleth(
+        "solid_waste_recycling",
+        "Solid Waste and Recycling Request Rate",
+        MAPS / "solid_waste_recycling_burden.png",
+    )
+    draw_thematic_choropleth(
+        "water_sewer_drainage",
+        "Water, Sewer, and Drainage Request Rate",
+        MAPS / "water_sewer_drainage_burden.png",
+    )
+    draw_thematic_choropleth(
+        "roads_signals_sidewalks",
+        "Road, Signal, and Sidewalk Request Rate",
+        MAPS / "roads_signals_sidewalks_burden.png",
+    )
     print("Wrote static figures and maps.")
 
 

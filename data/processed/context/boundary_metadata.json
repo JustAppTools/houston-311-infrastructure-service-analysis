@@ -2,6 +2,6 @@
   "source_name": "COH_Council_Districts",
   "source_url": "https://www.gis.hctx.net/arcgis/rest/services/CoH/CoH_Boundaries/MapServer/0",
   "records_downloaded": 11,
-  "downloaded_at_utc": "2026-06-15T00:19:52.261118+00:00",
-  "note": "Official council district polygons are used for V2 choropleth mapping and area-normalized request density."
+  "downloaded_at_utc": "2026-06-15T00:40:22.168396+00:00",
+  "note": "Official council district polygons are used for V3 choropleth mapping, point-in-polygon assignment, and area-normalized request density."
 }

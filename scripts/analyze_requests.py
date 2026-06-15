@@ -9,7 +9,17 @@ from project_config import DATA_CONTEXT, DATA_PROCESSED, TABLES, ensure_director
 CLEAN_FILE = DATA_PROCESSED / "houston_311_infrastructure_requests_cleaned.csv"
 SUMMARY_FILE = DATA_PROCESSED / "analysis_summary.json"
 BOUNDARY_FILE = DATA_CONTEXT / "council_district_boundaries.geojson"
+DEMOGRAPHICS_FILE = DATA_CONTEXT / "council_district_demographics.csv"
 SQFT_PER_SQMI = 27_878_400
+THEME_GROUPS = {
+    "solid_waste_recycling": ["Solid Waste / Recycling"],
+    "water_sewer_drainage": ["Water", "Sewer / Wastewater", "Drainage / Flooding"],
+    "roads_signals_sidewalks": [
+        "Road / Pothole / Bridge",
+        "Traffic Signals / Lighting",
+        "Sidewalk / Bike Lane",
+    ],
+}
 
 
 def district_area_table() -> pd.DataFrame:
@@ -29,6 +39,24 @@ def district_area_table() -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
+
+
+def demographic_table() -> pd.DataFrame:
+    columns = [
+        "council_district",
+        "estimated_population",
+        "estimated_households",
+        "poverty_rate",
+        "no_vehicle_household_share",
+        "median_household_income_weighted",
+    ]
+    if not DEMOGRAPHICS_FILE.exists():
+        return pd.DataFrame(columns=columns)
+    df = pd.read_csv(DEMOGRAPHICS_FILE)
+    for col in columns:
+        if col not in df.columns:
+            df[col] = np.nan
+    return df
 
 
 def burden_class(score: float) -> str:
@@ -51,6 +79,10 @@ def to_bool(series: pd.Series) -> pd.Series:
     if series.dtype == bool:
         return series
     return series.astype(str).str.lower().isin(["true", "1", "yes"])
+
+
+def rate_per_10k(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
+    return np.where(denominator.fillna(0) > 0, numerator / denominator * 10000, np.nan)
 
 
 def main() -> None:
@@ -151,22 +183,76 @@ def main() -> None:
     )
     area = area[area["council_district"].astype(str).str.match(r"^[A-K]$")].copy()
     area = area.merge(district_area_table(), on="council_district", how="left")
+    area = area.merge(demographic_table(), on="council_district", how="left")
     area["unresolved_share"] = area["unresolved_count"] / area["request_count"]
     area["long_resolution_share"] = area["long_resolution_count"] / area["request_count"]
     area["repeat_cluster_share"] = area["repeat_clustered_count"] / area["request_count"]
     area["requests_per_sq_mile"] = area["request_count"] / area["district_area_sq_mi"]
+    area["requests_per_10k_residents"] = rate_per_10k(
+        area["request_count"],
+        area.get("estimated_population", pd.Series(np.nan, index=area.index)),
+    )
+    area["requests_per_10k_households"] = rate_per_10k(
+        area["request_count"],
+        area.get("estimated_households", pd.Series(np.nan, index=area.index)),
+    )
     area["service_burden_score"] = (
-        percentile_rank(area["requests_per_sq_mile"].fillna(area["request_count"])) * 0.30
-        + percentile_rank(area["median_resolution_days"]) * 0.25
-        + percentile_rank(area["unresolved_share"]) * 0.20
-        + percentile_rank(area["long_resolution_share"]) * 0.15
-        + percentile_rank(area["repeat_cluster_share"]) * 0.10
+        percentile_rank(area["requests_per_10k_residents"].fillna(area["requests_per_sq_mile"])) * 0.25
+        + percentile_rank(area["requests_per_10k_households"].fillna(area["requests_per_sq_mile"])) * 0.15
+        + percentile_rank(area["median_resolution_days"]) * 0.20
+        + percentile_rank(area["unresolved_share"]) * 0.15
+        + percentile_rank(area["long_resolution_share"]) * 0.10
+        + percentile_rank(area["repeat_cluster_share"]) * 0.15
     )
     area["service_burden_class"] = area["service_burden_score"].apply(burden_class)
     area_sorted = area.sort_values("service_burden_score", ascending=False)
     area_sorted.to_csv(
         TABLES / "council_district_service_burden.csv", index=False
     )
+
+    thematic_rows = []
+    for theme, categories in THEME_GROUPS.items():
+        subset = df[df["standardized_category"].isin(categories)]
+        if subset.empty:
+            continue
+        theme_area = (
+            subset[subset["council_district"].isin(area["council_district"])]
+            .groupby("council_district")
+            .agg(
+                request_count=("case_number", "count"),
+                unresolved_count=("is_open", "sum"),
+                long_resolution_count=("is_long_resolution", "sum"),
+                repeat_clustered_count=("is_repeat_cluster", "sum"),
+                median_resolution_days=("resolution_days", "median"),
+            )
+            .reset_index()
+        )
+        theme_area = area[["council_district", "district_area_sq_mi", "estimated_population", "estimated_households"]].merge(
+            theme_area, on="council_district", how="left"
+        )
+        for col in ["request_count", "unresolved_count", "long_resolution_count", "repeat_clustered_count"]:
+            theme_area[col] = theme_area[col].fillna(0)
+        theme_area["theme"] = theme
+        theme_area["requests_per_sq_mile"] = theme_area["request_count"] / theme_area["district_area_sq_mi"]
+        theme_area["requests_per_10k_residents"] = rate_per_10k(
+            theme_area["request_count"],
+            theme_area.get("estimated_population", pd.Series(np.nan, index=theme_area.index)),
+        )
+        theme_area["unresolved_share"] = np.where(
+            theme_area["request_count"] > 0,
+            theme_area["unresolved_count"] / theme_area["request_count"],
+            np.nan,
+        )
+        theme_area["long_resolution_share"] = np.where(
+            theme_area["request_count"] > 0,
+            theme_area["long_resolution_count"] / theme_area["request_count"],
+            np.nan,
+        )
+        thematic_rows.append(theme_area)
+    if thematic_rows:
+        pd.concat(thematic_rows, ignore_index=True).sort_values(
+            ["theme", "requests_per_10k_residents"], ascending=[True, False]
+        ).to_csv(TABLES / "thematic_district_burden.csv", index=False)
 
     drivers = []
     for district, subset in df[df["council_district"].isin(area["council_district"])].groupby("council_district"):
@@ -207,6 +293,7 @@ def main() -> None:
         else None,
         "unresolved_share_overall": float(df["is_open"].mean()),
         "long_resolution_share_overall": float(df["is_long_resolution"].mean()),
+        "repeat_cluster_share_overall": float(df["is_repeat_cluster"].mean()),
         "top_burden_council_district": area_sorted.iloc[0].to_dict() if not area_sorted.empty else None,
         "tables": [
             "top_infrastructure_request_categories.csv",
@@ -217,6 +304,7 @@ def main() -> None:
             "council_district_service_burden.csv",
             "district_burden_drivers.csv",
             "repeat_location_clusters.csv",
+            "thematic_district_burden.csv",
         ],
     }
     SUMMARY_FILE.write_text(json.dumps(summary, indent=2), encoding="utf-8")

@@ -2677,7 +2677,7 @@
         "resolution_days": 0.7246180555555556,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "H",
         "super_neighborhood": "GREATER HEIGHTS",
         "quality_flags": "ok"
       }
@@ -3077,7 +3077,7 @@
         "resolution_days": 0.0010416666666666667,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "F",
         "super_neighborhood": "+",
         "quality_flags": "ok"
       }
@@ -4702,7 +4702,7 @@
         "resolution_days": 34.902453703703706,
         "is_open": false,
         "is_long_resolution": true,
-        "council_district": "G",
+        "council_district": "I",
         "super_neighborhood": "MEMORIAL",
         "quality_flags": "ok"
       }
@@ -6502,7 +6502,7 @@
         "resolution_days": 0.30372685185185183,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "H",
         "super_neighborhood": "WASHINGTON AVENUE COALITION / MEMORIAL PARK",
         "quality_flags": "ok"
       }
@@ -11652,7 +11652,7 @@
         "resolution_days": 4.889513888888889,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "I",
         "super_neighborhood": "+",
         "quality_flags": "ok"
       }
@@ -17727,7 +17727,7 @@
         "resolution_days": 2.234513888888889,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "H",
         "super_neighborhood": "GREATER HEIGHTS",
         "quality_flags": "ok"
       }
@@ -17752,7 +17752,7 @@
         "resolution_days": 0.002337962962962963,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "H",
         "super_neighborhood": "GREATER HEIGHTS",
         "quality_flags": "ok"
       }
@@ -22102,7 +22102,7 @@
         "resolution_days": 0.0032407407407407406,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "I",
         "super_neighborhood": "+",
         "quality_flags": "ok"
       }
@@ -24402,7 +24402,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "K",
+        "council_district": "C",
         "super_neighborhood": "MEDICAL CENTER AREA",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -26477,7 +26477,7 @@
         "resolution_days": 0.9779861111111111,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "I",
         "super_neighborhood": "NEARTOWN - MONTROSE",
         "quality_flags": "ok"
       }
@@ -27927,7 +27927,7 @@
         "resolution_days": 1.8306597222222223,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "A",
+        "council_district": "I",
         "super_neighborhood": "SPRING BRANCH EAST",
         "quality_flags": "ok"
       }
@@ -29677,7 +29677,7 @@
         "resolution_days": 0.8581597222222223,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "K",
+        "council_district": "D",
         "super_neighborhood": "CENTRAL SOUTHWEST",
         "quality_flags": "ok"
       }
@@ -30577,7 +30577,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "K",
         "super_neighborhood": "WESTBURY",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -33427,7 +33427,7 @@
         "resolution_days": 0.8979398148148148,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "J",
+        "council_district": "G",
         "super_neighborhood": "MID WEST",
         "quality_flags": "ok"
       }
@@ -37152,7 +37152,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "J",
+        "council_district": "F",
         "super_neighborhood": "MID WEST",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -38327,7 +38327,7 @@
         "resolution_days": 0.03771990740740741,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "G",
+        "council_district": "C",
         "super_neighborhood": "AFTON OAKS / RIVER OAKS AREA",
         "quality_flags": "ok"
       }
@@ -42252,7 +42252,7 @@
         "resolution_days": 18.877094907407407,
         "is_open": false,
         "is_long_resolution": true,
-        "council_district": "H",
+        "council_district": "I",
         "super_neighborhood": "NORTHSIDE/NORTHLINE",
         "quality_flags": "ok"
       }
@@ -45427,7 +45427,7 @@
         "resolution_days": 2.8610069444444446,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "B",
         "super_neighborhood": "+",
         "quality_flags": "ok"
       }
@@ -50577,7 +50577,7 @@
         "resolution_days": 7.276550925925926,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "F",
+        "council_district": "G",
         "super_neighborhood": "WESTCHASE",
         "quality_flags": "ok"
       }
@@ -52452,7 +52452,7 @@
         "resolution_days": 4.739247685185185,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "J",
+        "council_district": "K",
         "super_neighborhood": "BRAYS OAKS",
         "quality_flags": "ok"
       }
@@ -55027,7 +55027,7 @@
         "resolution_days": 36.15212962962963,
         "is_open": false,
         "is_long_resolution": true,
-        "council_district": "H",
+        "council_district": "I",
         "super_neighborhood": "NORTHSIDE/NORTHLINE",
         "quality_flags": "ok"
       }
@@ -57602,7 +57602,7 @@
         "resolution_days": 1.303912037037037,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "J",
+        "council_district": "F",
         "super_neighborhood": "MID WEST",
         "quality_flags": "ok"
       }
@@ -57777,7 +57777,7 @@
         "resolution_days": 0.9522222222222222,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "H",
+        "council_district": "B",
         "super_neighborhood": "GREATER GREENSPOINT",
         "quality_flags": "ok"
       }
@@ -58052,7 +58052,7 @@
         "resolution_days": 0.29060185185185183,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "F",
+        "council_district": "I",
         "super_neighborhood": "ALIEF",
         "quality_flags": "ok"
       }
@@ -58852,7 +58852,7 @@
         "resolution_days": 0.7897800925925926,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "D",
+        "council_district": "C",
         "super_neighborhood": "MIDTOWN",
         "quality_flags": "ok"
       }
@@ -60627,7 +60627,7 @@
         "resolution_days": 4.817974537037037,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "F",
+        "council_district": "G",
         "super_neighborhood": "MID WEST",
         "quality_flags": "ok"
       }
@@ -62252,7 +62252,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "C",
+        "council_district": "K",
         "super_neighborhood": "UNIVERSITY PLACE",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -65202,7 +65202,7 @@
         "resolution_days": 0.2763541666666667,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "J",
+        "council_district": "G",
         "super_neighborhood": "MID WEST",
         "quality_flags": "ok"
       }
@@ -68927,7 +68927,7 @@
         "resolution_days": 5.925671296296296,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "F",
+        "council_district": "I",
         "super_neighborhood": "ELDRIDGE / WEST OAKS",
         "quality_flags": "ok"
       }
@@ -71552,7 +71552,7 @@
         "resolution_days": 2.922858796296296,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "I",
+        "council_district": "D",
         "super_neighborhood": "GOLFCREST / BELLFORT / REVEILLE",
         "quality_flags": "ok"
       }
@@ -71902,7 +71902,7 @@
         "resolution_days": 0.017962962962962962,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "E",
+        "council_district": "I",
         "super_neighborhood": "SOUTH BELT / ELLINGTON",
         "quality_flags": "ok"
       }
@@ -77502,7 +77502,7 @@
         "resolution_days": 5.842291666666667,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "A",
+        "council_district": "I",
         "super_neighborhood": "SPRING BRANCH EAST",
         "quality_flags": "ok"
       }
@@ -82002,7 +82002,7 @@
         "resolution_days": 0.04880787037037037,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "K",
+        "council_district": "D",
         "super_neighborhood": "CENTRAL SOUTHWEST",
         "quality_flags": "ok"
       }
@@ -84377,7 +84377,7 @@
         "resolution_days": 4.148078703703704,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "B",
+        "council_district": "H",
         "super_neighborhood": "DENVER HARBOR / PORT HOUSTON",
         "quality_flags": "ok"
       }
@@ -84677,7 +84677,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "B",
+        "council_district": "I",
         "super_neighborhood": "GREATER FIFTH WARD",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -103852,7 +103852,7 @@
         "resolution_days": null,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "I",
         "super_neighborhood": "+",
         "quality_flags": "invalid_future_closed_date|missing_closed_date_for_non_open"
       }
@@ -107352,7 +107352,7 @@
         "resolution_days": 6.047835648148149,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "B",
+        "council_district": "H",
         "super_neighborhood": "ACRES HOME",
         "quality_flags": "ok"
       }
@@ -107427,7 +107427,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "H",
         "super_neighborhood": "+",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -111702,7 +111702,7 @@
         "resolution_days": null,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "+",
+        "council_district": "C",
         "super_neighborhood": "+",
         "quality_flags": "invalid_future_closed_date|missing_closed_date_for_non_open"
       }
@@ -121877,7 +121877,7 @@
         "resolution_days": null,
         "is_open": true,
         "is_long_resolution": false,
-        "council_district": "I",
+        "council_district": "D",
         "super_neighborhood": "PARK PLACE",
         "quality_flags": "invalid_future_closed_date"
       }
@@ -122052,7 +122052,7 @@
         "resolution_days": 0.7344444444444445,
         "is_open": false,
         "is_long_resolution": false,
-        "council_district": "J",
+        "council_district": "G",
         "super_neighborhood": "GREATER UPTOWN",
         "quality_flags": "ok"
       }

@@ -2,7 +2,7 @@ original_field_name,cleaned_field_name,meaning,cleaning_transformation_rule,note
 OBJECTID,source_objectid,ArcGIS source object identifier,Copied from source layer,Used for source traceability only
 Case_Number,case_number,Public 311 case number,Copied from source layer,No address or narrative fields are published in processed output
 Incident_Case_Type,request_type,Source service request type,Copied from source layer,Primary field used for infrastructure filtering and classification
-Incident_Case_Type,standardized_category,V2 analytical category,Keyword classifier groups request types into infrastructure categories,Rules are documented in scripts/project_config.py
+Incident_Case_Type,standardized_category,V3 analytical category,Keyword classifier groups request types into infrastructure categories,Rules are documented in scripts/project_config.py
 Created_Date_Local,opened_date,Local created/opened timestamp,Converted from ArcGIS epoch milliseconds to ISO timestamp,Timezone metadata is documented as Central time in recent service; archive dates are treated as source local timestamps after conversion
 Closed_Date,closed_date,Closed timestamp where available,Converted from ArcGIS epoch milliseconds to ISO timestamp,Missing for open or incomplete cases
 Status,status,Source status text,Copied from source layer,Used with state_code_name and closed_date to flag open records
@@ -14,15 +14,21 @@ SLA_Name,sla_name,Source SLA label,Copied from source layer,Not used for late de
 Resolve_By_Time,resolve_by_time,Source resolve-by timestamp,Converted from ArcGIS epoch milliseconds to ISO timestamp,Retained but not used for findings due to source quality issue
 Latitude,latitude,Latitude coordinate,Numeric conversion using source Latitude with geometry fallback,Quality flags note missing or out-of-range coordinates
 Longitude,longitude,Longitude coordinate,Numeric conversion using source Longitude with geometry fallback,Quality flags note missing or out-of-range coordinates
-Council_District,council_district,Houston council district,Copied from source layer,Used for V2 service-burden screening
+Council_District,source_council_district,Houston council district from source record,Copied from source layer,Retained for audit comparison
+Derived,spatial_council_district,Point-in-polygon council district,Assigned from request latitude/longitude and official council district polygons,Preferred district field for V3 analysis where coordinates are valid
+Derived,council_district,Analysis council district,Uses spatial_council_district when available and source_council_district as fallback,Used for V3 service-burden screening
 Customer_SuperNeighborhood,super_neighborhood,Customer super-neighborhood,Copied from source layer,Used for future neighborhood aggregation
 Derived,resolution_days,Days between opened and closed timestamps,closed_date minus opened_date in calendar days,Negative or missing intervals are set to missing
 Derived,is_open,Open/unresolved flag,True when no closed date and status/state do not indicate resolved/completed/cancelled/merged,Best-effort flag from source status fields
-Derived,is_long_resolution,Long-resolution flag,True when resolution_days is greater than 14 days,Threshold selected for V2 screening and documented as analytical not official
+Derived,is_long_resolution,Long-resolution flag,True when resolution_days is greater than 14 days,Threshold selected for V3 screening and documented as analytical not official
 Derived,invalid_future_closed_date,Closed-date QA flag,True when source closed date is later than the pipeline run date plus one day,Far-future closed dates are treated as invalid and excluded from resolution-time calculations
 Derived,lat_bin_approx_100m,Approximate latitude cluster bin,Latitude rounded to three decimals,Used for repeat-location screening without publishing address fields
 Derived,lon_bin_approx_100m,Approximate longitude cluster bin,Longitude rounded to three decimals,Used for repeat-location screening without publishing address fields
 Derived,repeat_cluster_count,Repeat-location cluster count,Count of records sharing standardized category council district and rounded coordinate bin,Approximate screening metric rather than address-level deduplication
-Derived,is_repeat_cluster,Repeat-location flag,True when repeat_cluster_count is at least 3,Threshold selected for V2 screening
+Derived,is_repeat_cluster,Repeat-location flag,True when repeat_cluster_count is at least 3,Threshold selected for V3 screening
 Derived,month,Opened month,YYYY-MM period from opened_date,Used for monthly summary where date span supports it
+ACS/TIGER,estimated_population,Estimated district population,Optional ACS tract internal-point assignment to council districts,Requires CENSUS_API_KEY in environments where Census API enforces keys
+ACS/TIGER,estimated_households,Estimated district households,Optional ACS tract internal-point assignment to council districts,Requires CENSUS_API_KEY in environments where Census API enforces keys
+ACS/TIGER,requests_per_10k_residents,Resident-normalized request rate,request_count divided by estimated_population times 10000,Falls back out of score when ACS data unavailable
+ACS/TIGER,requests_per_10k_households,Household-normalized request rate,request_count divided by estimated_households times 10000,Falls back out of score when ACS data unavailable
 Derived,quality_flags,Record-level QA/QC flags,Pipe-delimited flags for missing dates coordinates low-confidence category or out-of-range coordinates,ok means no basic QA flag was triggered

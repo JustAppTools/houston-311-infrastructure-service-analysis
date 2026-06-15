@@ -33,7 +33,7 @@ def main() -> None:
         "source_url": COUNCIL_DISTRICTS_URL,
         "records_downloaded": len(geojson["features"]),
         "downloaded_at_utc": datetime.now(timezone.utc).isoformat(),
-        "note": "Official council district polygons are used for V2 choropleth mapping and area-normalized request density.",
+        "note": "Official council district polygons are used for V3 choropleth mapping, point-in-polygon assignment, and area-normalized request density.",
     }
     BOUNDARY_METADATA.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(f"Wrote {len(geojson['features'])} council district boundary features.")

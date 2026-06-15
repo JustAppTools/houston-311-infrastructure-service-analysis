@@ -4,30 +4,28 @@ GIS and data analysis of Houston 311 infrastructure-related service requests, re
 
 ## Project Overview
 
-This V2 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. The work is designed as a technical analysis package rather than a dashboard: it includes reproducible scripts, official council-district boundary context, a cleaned processed dataset, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, and a technical memo.
+This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a technical analysis package rather than a dashboard: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, and public-sector documentation.
 
 **Research question:** Which Houston areas show the highest infrastructure-service burden based on request volume, issue type, resolution time, unresolved cases, long-resolution cases, and recurring request clusters?
 
-## V2 Data Scope
+## V3 Data Scope
 
-The committed V2 outputs use a bounded real-data extract from the City of Houston `Houston311_Archives` ArcGIS MapServer layer:
-
-- Source: [Houston311_Archives MapServer layer](https://mycity2.houstontx.gov/gisweb01/rest/services/311/Houston311_Archives/MapServer/0)
+- 311 source: [Houston311_Archives MapServer layer](https://mycity2.houstontx.gov/gisweb01/rest/services/311/Houston311_Archives/MapServer/0)
 - Query window: `2025-04-01` through `2025-06-30`
 - Downloaded records: `82,743`
-- Infrastructure filtering: request-type keyword screen for water, sewer, drainage, flooding, potholes, sidewalks, traffic signals, lighting, dumping, trash, recycling, garbage, bridges, streets, debris, and containers
 - Boundary source: [COH_Council_Districts](https://www.gis.hctx.net/arcgis/rest/services/CoH/CoH_Boundaries/MapServer/0)
+- Demographic source: 2024 ACS 5-year API and Census TIGERweb tract internal points, enabled when `CENSUS_API_KEY` is available
 
-Raw extracts are generated locally in `data/raw/` and ignored by git. The full cleaned analytical CSV is committed in `data/processed/`.
+In this coding environment, the Census API returned a key-required response. V3 therefore records the ACS access limitation and falls back to area-normalized rates. The demographic fetch script is ready to produce population and household rates once `CENSUS_API_KEY` is set.
 
-## Key V2 Findings
+## Key V3 Findings
 
-- The April-June 2025 infrastructure extract contains `82,743` records with valid latitude/longitude values after basic QA screening.
-- `Solid Waste / Recycling` is the largest standardized category with `43,194` requests, led by missed recycling pickup, missed garbage pickup, missed heavy-trash pickup, and container replacement.
+- The April-June 2025 extract contains `82,743` cleaned infrastructure-related records.
+- `Solid Waste / Recycling` remains the largest category with `43,194` requests.
 - Overall median resolution time among records with usable closed dates is about `3.8` days.
-- `Solid Waste / Recycling` has the highest median resolution time among major categories at about `8.1` days.
-- `Drainage / Flooding` has the highest unresolved share among multi-record categories at about `20.0%`, followed by `Solid Waste / Recycling` at about `18.8%`.
-- The V2 burden score ranks council district `H` as `Very High`. Districts `C`, `B`, `D`, `A`, and `K` rank `High`.
+- Overall unresolved share is about `15.5%`.
+- About `42.0%` of records fall in approximate repeat-location clusters.
+- Under the V3 score, council district `C` ranks `Very High`; district `H` is also `Very High`.
 - Repeat-location screening detected `7,945` approximate coordinate/category clusters with at least three requests.
 
 These are analytical findings from a bounded public-data extract, not official City performance measures.
@@ -42,42 +40,11 @@ These are analytical findings from a bounded public-data extract, not official C
 
 ![Repeat location clusters](outputs/maps/repeat_location_clusters.png)
 
+![Solid waste and recycling burden](outputs/maps/solid_waste_recycling_burden.png)
+
+![Water sewer drainage burden](outputs/maps/water_sewer_drainage_burden.png)
+
 ![Request count by category](outputs/figures/request_count_by_category.png)
-
-![Monthly request volume](outputs/figures/monthly_request_volume.png)
-
-![Median resolution time by category](outputs/figures/median_resolution_time_by_category.png)
-
-## Repository Structure
-
-```text
-.
-|-- README.md
-|-- data/
-|   |-- raw/
-|   |-- processed/
-|   |   `-- context/
-|   `-- data_dictionary.csv
-|-- docs/
-|   |-- technical_memo.md
-|   |-- methodology.md
-|   |-- data_sources.md
-|   `-- limitations.md
-|-- outputs/
-|   |-- maps/
-|   |-- figures/
-|   `-- tables/
-|-- scripts/
-|   |-- fetch_data.py
-|   |-- fetch_boundaries.py
-|   |-- clean_311_requests.py
-|   |-- analyze_requests.py
-|   |-- make_maps.py
-|   `-- run_all.py
-|-- requirements.txt
-|-- .gitignore
-`-- LICENSE
-```
 
 ## How To Run
 
@@ -87,22 +54,59 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run the full default V2 pipeline:
+Run the full default V3 pipeline:
 
 ```bash
 python scripts/run_all.py
 ```
 
-Run a different source window:
+Run with Census ACS normalization:
 
 ```bash
-python scripts/run_all.py --start-date 2025-04-01 --end-date 2025-07-01 --max-records 100000
+set CENSUS_API_KEY=your_key_here
+python scripts/run_all.py
 ```
 
-Reuse an existing raw extract:
+Reuse the 311 raw extract while refreshing boundaries/demographics:
 
 ```bash
 python scripts/run_all.py --skip-fetch
+```
+
+Run tests:
+
+```bash
+python -m unittest discover -s tests
+```
+
+## Repository Structure
+
+```text
+.
+|-- README.md
+|-- Makefile
+|-- data/
+|   |-- raw/
+|   |-- processed/
+|   |   `-- context/
+|   `-- data_dictionary.csv
+|-- docs/
+|   |-- executive_summary.md
+|   |-- technical_memo.md
+|   |-- methodology.md
+|   |-- data_sources.md
+|   |-- limitations.md
+|   |-- changelog.md
+|   `-- portfolio_page.html
+|-- outputs/
+|   |-- maps/
+|   |-- figures/
+|   `-- tables/
+|-- scripts/
+|-- tests/
+|-- requirements.txt
+|-- .gitignore
+`-- LICENSE
 ```
 
 ## Skills Demonstrated
@@ -110,14 +114,14 @@ python scripts/run_all.py --skip-fetch
 - Public data acquisition from ArcGIS REST services
 - Reproducible data pipeline design
 - 311 service-request classification
+- Point-in-polygon spatial assignment
 - Date/time cleaning and resolution-time analysis
-- QA/QC flags for missing dates, coordinates, categories, and invalid future closed dates
-- Official council-district choropleth mapping
-- Area-normalized service-burden screening
+- Optional ACS demographic normalization
 - Repeat-location cluster screening
+- Official council-district choropleth mapping
 - Static chart and map production
 - Public-sector technical writing and limitations documentation
 
 ## Limitations
 
-V2 uses official district polygons for map display and area-normalized request density, but aggregation still relies on the source record's council-district attribute rather than a point-in-polygon spatial join. Population normalization and ACS vulnerability overlays remain V3 candidates.
+V3 performs point-in-polygon district assignment and supports ACS normalization, but ACS data could not be fetched in this environment without a Census API key. The current committed score therefore uses area density as the rate component. Population normalization, ACS overlays, and tract demographic summaries can be regenerated by setting `CENSUS_API_KEY`.

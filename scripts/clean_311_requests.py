@@ -8,15 +8,18 @@ from project_config import (
     CATEGORY_RULES,
     DATA_PROCESSED,
     DATA_RAW,
+    DATA_CONTEXT,
     LONG_RESOLUTION_DAYS,
     REPEAT_CLUSTER_MIN_COUNT,
     ensure_directories,
 )
+from spatial_utils import assign_point_to_district, load_geojson
 
 
 RAW_FILE = DATA_RAW / "houston_311_archive_infrastructure_extract.csv"
 CLEAN_FILE = DATA_PROCESSED / "houston_311_infrastructure_requests_cleaned.csv"
 GEOJSON_FILE = DATA_PROCESSED / "houston_311_infrastructure_requests_cleaned.geojson"
+BOUNDARY_FILE = DATA_CONTEXT / "council_district_boundaries.geojson"
 
 
 def parse_arcgis_datetime(series: pd.Series) -> pd.Series:
@@ -136,10 +139,21 @@ def main() -> None:
             "resolve_by_time": parse_arcgis_datetime(raw.get("Resolve_By_Time")),
             "latitude": pd.to_numeric(raw.get("Latitude").fillna(raw.get("geometry_y")), errors="coerce"),
             "longitude": pd.to_numeric(raw.get("Longitude").fillna(raw.get("geometry_x")), errors="coerce"),
-            "council_district": raw.get("Council_District"),
+            "source_council_district": raw.get("Council_District"),
             "super_neighborhood": raw.get("Customer_SuperNeighborhood"),
         }
     )
+    boundaries = load_geojson(BOUNDARY_FILE)
+    if boundaries is not None:
+        df["spatial_council_district"] = [
+            assign_point_to_district(lon, lat, boundaries)
+            if pd.notna(lon) and pd.notna(lat)
+            else None
+            for lon, lat in zip(df["longitude"], df["latitude"])
+        ]
+    else:
+        df["spatial_council_district"] = None
+    df["council_district"] = df["spatial_council_district"].fillna(df["source_council_district"])
     max_reasonable_closed = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)
     df["invalid_future_closed_date"] = df["closed_date"] > max_reasonable_closed
     df.loc[df["invalid_future_closed_date"], "closed_date"] = pd.NaT
@@ -155,6 +169,8 @@ def main() -> None:
     cluster_cols = [
         "standardized_category",
         "council_district",
+        "source_council_district",
+        "spatial_council_district",
         "lat_bin_approx_100m",
         "lon_bin_approx_100m",
     ]

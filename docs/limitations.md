@@ -1,31 +1,25 @@
 # Limitations
 
-## Data Access and Scope
+## Scope
 
-V2 uses one accessible City of Houston ArcGIS archive layer. The public web map's D365 map image service returned a server error during development, so it was not used for analytical outputs.
-
-The committed outputs use an April-June 2025 extract. Findings should be read as a bounded V2 analysis, not a long-term trend or comprehensive historical performance audit.
+The committed outputs use an April-June 2025 extract. Findings should be read as a bounded public-data screening analysis, not a long-term trend or official performance audit.
 
 ## Classification
 
-Infrastructure requests are selected and grouped with keyword rules. This is transparent and reproducible, but it can miss relevant categories with unexpected names or include categories that are adjacent to infrastructure operations.
+Infrastructure requests are selected and grouped with keyword rules. This is transparent and reproducible, but a reviewed source-type crosswalk would be stronger.
 
-## Resolution Time
+## Spatial Assignment
 
-Resolution time is calculated from opened and closed date fields. Records with missing, negative, or far-future closed dates are excluded from median resolution calculations. The V2 long-resolution threshold is `14` days and is an analytical screening threshold, not an official SLA.
+V3 assigns request points to official council district polygons with a lightweight point-in-polygon implementation. This improves on using the source district field, but it is still dependent on source coordinate quality.
 
-The `Resolve_By_Time` field is retained but not used for late-case findings because far-future values appeared in the archive extract.
+## Demographics
 
-## Spatial Analysis
+The project supports ACS population and household normalization, but the Census API required a key in this environment. The committed score therefore falls back to area-normalized request density. Set `CENSUS_API_KEY` and rerun the pipeline to generate ACS-normalized rates.
 
-V2 uses official council-district polygons for choropleth mapping and district area estimates. However, area burden is still summarized from the source `Council_District` attribute in each 311 record rather than reassigned by point-in-polygon overlay.
-
-V2 does not include population normalization, ACS vulnerability overlays, or official address-level repeat-request deduplication.
+## Repeat Clusters
 
 Repeat-location clusters use rounded coordinates and category matching. They identify candidate recurring service locations, not verified duplicate requests.
 
-## Privacy and Interpretation
-
-Processed outputs omit source address and narrative fields. Maps still show request coordinates from the public source data, so outputs should be interpreted as operational screening products rather than resident-level analysis.
+## Interpretation
 
 Findings are not official City of Houston metrics and should not be used for emergency response or operational dispatch decisions.
