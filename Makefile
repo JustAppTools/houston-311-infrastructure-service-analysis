@@ -1,4 +1,4 @@
-.PHONY: all fetch clean analyze maps deliverables test compile pages-ready
+.PHONY: all fetch clean analyze gis maps deliverables test compile pages-ready
 
 PYTHON ?= python
 
@@ -16,6 +16,9 @@ clean:
 
 analyze:
 	$(PYTHON) scripts/analyze_requests.py
+
+gis:
+	$(PYTHON) scripts/export_gis_layers.py
 
 maps:
 	$(PYTHON) scripts/make_maps.py

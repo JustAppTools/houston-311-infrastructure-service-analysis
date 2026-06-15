@@ -1,5 +1,15 @@
 # Changelog
 
+## V3.4
+
+- Reframed the primary plate language around reported 311 requests and screening analysis.
+- Added District E spatial-assignment QA disclosure to the main plate and generated QA map.
+- Added source-vs-spatial district assignment matrix and unscored-request diagnostics.
+- Added non-solid-waste, equal-weight, and category-balanced sensitivity outputs.
+- Added formal sensitivity and QA map plates to the atlas.
+- Added GIS-ready GeoJSON exports for district scores, QA flags, repeat clusters, and sampled request points.
+- Added known limitations documentation and expanded test coverage for sensitivity/GIS outputs.
+
 ## V3.2
 
 - Reframed the project around static GIS analysis and map production.

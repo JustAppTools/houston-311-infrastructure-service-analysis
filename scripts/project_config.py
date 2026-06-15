@@ -11,6 +11,7 @@ OUTPUTS = ROOT / "outputs"
 TABLES = OUTPUTS / "tables"
 FIGURES = OUTPUTS / "figures"
 MAPS = OUTPUTS / "maps"
+GIS = OUTPUTS / "gis"
 DOCS = ROOT / "docs"
 DELIVERABLES = ROOT / "deliverables"
 MAP_PLATES = DELIVERABLES / "map_plates"
@@ -128,6 +129,7 @@ def ensure_directories() -> None:
         TABLES,
         FIGURES,
         MAPS,
+        GIS,
         DOCS,
         DELIVERABLES,
         MAP_PLATES,

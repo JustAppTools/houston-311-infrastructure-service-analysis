@@ -36,3 +36,11 @@ Derived,coordinate_completeness,District-level coordinate completeness,records_w
 Derived,spatial_assignment_share,District-level spatial assignment share,spatially_assigned_records divided by request_count in outputs/tables/district_data_quality.csv,Audit metric not used in score
 Derived,source_spatial_district_agreement,District source-vs-spatial agreement,share of comparable records where source_council_district equals spatial_council_district,Audit metric not used in score
 Derived,score_components.csv,Score component table,Component percentiles and weighted points by council district,Used to explain the composite service-burden score
+Derived,source_spatial_assignment_matrix.csv,Source/spatial district cross-tab,Counts source council district labels against point-in-polygon assignments,Used to diagnose District E and other assignment issues
+Derived,unscored_request_diagnostics.csv,Unscored request diagnostic table,Groups records outside the A-K council-district score total by reason category and QA flags,Used to explain why total cleaned records can exceed scored records
+Derived,score_sensitivity_rankings.csv,Score sensitivity ranking table,Compares baseline equal-weight non-solid-waste and category-balanced scenarios,Used to assess rank robustness
+Derived,council_district_non_solid_waste_screening.csv,Non-solid-waste screening score,Recomputes the weighted score after excluding Solid Waste / Recycling,Tests whether rankings are driven by the dominant category
+Derived,category_balanced_district_density.csv,Category-balanced density score,Averages district density percentiles across categories,Equalizes category influence for density comparison
+Derived,outputs/gis/council_district_screening_index.geojson,GIS district screening layer,Merges council district polygons with baseline QA and alternate score fields,Primary GIS-ready polygon export
+Derived,outputs/gis/repeat_location_clusters.geojson,GIS repeat-cluster point layer,Exports rounded-coordinate repeat clusters as point GeoJSON,Approximate screening layer not address-level deduplication
+Derived,outputs/gis/district_assignment_qa_flags.geojson,GIS QA polygon layer,Exports district polygons with spatial assignment share below 90 percent,Highlights districts requiring review

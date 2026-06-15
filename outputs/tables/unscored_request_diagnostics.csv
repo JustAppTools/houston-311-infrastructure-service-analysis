@@ -1,0 +1,30 @@
+unscored_reason,source_district_label,spatial_district_label,standardized_category,quality_flags,request_count
+nonstandard_or_missing_source_district,+,UNASSIGNED,Water,ok,56
+nonstandard_or_missing_source_district,+,UNASSIGNED,Traffic Signals / Lighting,ok,53
+nonstandard_or_missing_source_district,+,UNASSIGNED,Road / Pothole / Bridge,ok,45
+nonstandard_or_missing_source_district,+,UNASSIGNED,Sewer / Wastewater,ok,28
+nonstandard_or_missing_source_district,+,UNASSIGNED,Solid Waste / Recycling,ok,19
+nonstandard_or_missing_source_district,+,UNASSIGNED,Water,invalid_future_closed_date|missing_closed_date_for_non_open,18
+nonstandard_or_missing_source_district,+,UNASSIGNED,Road / Pothole / Bridge,invalid_future_closed_date|missing_closed_date_for_non_open,16
+nonstandard_or_missing_source_district,+,UNASSIGNED,Drainage / Flooding,ok,10
+nonstandard_or_missing_source_district,+,UNASSIGNED,Traffic Signals / Lighting,invalid_future_closed_date|missing_closed_date_for_non_open,8
+nonstandard_or_missing_source_district,+,UNASSIGNED,Road / Pothole / Bridge,invalid_future_closed_date,8
+nonstandard_or_missing_source_district,+,UNASSIGNED,Traffic Signals / Lighting,coordinate_outside_houston_screen,8
+nonstandard_or_missing_source_district,+,UNASSIGNED,Solid Waste / Recycling,invalid_future_closed_date|missing_closed_date_for_non_open,7
+nonstandard_or_missing_source_district,+,UNASSIGNED,Traffic Signals / Lighting,invalid_future_closed_date,6
+nonstandard_or_missing_source_district,+,UNASSIGNED,Road / Pothole / Bridge,invalid_future_closed_date|missing_closed_date_for_non_open|coordinate_outside_houston_screen,5
+nonstandard_or_missing_source_district,+,UNASSIGNED,Solid Waste / Recycling,invalid_future_closed_date,5
+nonstandard_or_missing_source_district,+,UNASSIGNED,Water,coordinate_outside_houston_screen,4
+nonstandard_or_missing_source_district,+,UNASSIGNED,Solid Waste / Recycling,coordinate_outside_houston_screen,4
+nonstandard_or_missing_source_district,+,UNASSIGNED,Drainage / Flooding,invalid_future_closed_date|missing_closed_date_for_non_open,4
+nonstandard_or_missing_source_district,+,UNASSIGNED,Sewer / Wastewater,invalid_future_closed_date|missing_closed_date_for_non_open,4
+nonstandard_or_missing_source_district,+,UNASSIGNED,Water,invalid_future_closed_date,3
+nonstandard_or_missing_source_district,+,UNASSIGNED,Traffic Signals / Lighting,invalid_future_closed_date|missing_closed_date_for_non_open|coordinate_outside_houston_screen,3
+nonstandard_or_missing_source_district,+,UNASSIGNED,Road / Pothole / Bridge,coordinate_outside_houston_screen,2
+nonstandard_or_missing_source_district,+,UNASSIGNED,Sewer / Wastewater,coordinate_outside_houston_screen,2
+nonstandard_or_missing_source_district,+,UNASSIGNED,Water,invalid_future_closed_date|missing_closed_date_for_non_open|coordinate_outside_houston_screen,2
+nonstandard_or_missing_source_district,+,UNASSIGNED,Drainage / Flooding,invalid_future_closed_date,1
+nonstandard_or_missing_source_district,+,UNASSIGNED,Sewer / Wastewater,invalid_future_closed_date,1
+nonstandard_or_missing_source_district,+,UNASSIGNED,Drainage / Flooding,coordinate_outside_houston_screen,1
+nonstandard_or_missing_source_district,+,UNASSIGNED,Drainage / Flooding,invalid_future_closed_date|coordinate_outside_houston_screen,1
+nonstandard_or_missing_source_district,+,UNASSIGNED,Solid Waste / Recycling,invalid_future_closed_date|coordinate_outside_houston_screen,1

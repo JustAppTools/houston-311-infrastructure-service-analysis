@@ -10,7 +10,7 @@ The repository now includes a root `index.html` static showcase, GitHub Actions 
 
 ## Purpose
 
-This V3 analysis identifies Houston infrastructure-service burden using public 311 request records, official council district polygons, spatial district assignment, repeat-location screening, and static GIS outputs.
+This V3 analysis identifies reported Houston 311 infrastructure-request patterns using public 311 request records, official council district polygons, spatial district assignment, repeat-location screening, sensitivity checks, and static GIS outputs.
 
 ## Data
 
@@ -24,7 +24,9 @@ The pipeline also supports 2024 ACS 5-year demographic normalization. In this en
 
 The pipeline filters infrastructure-related 311 records, standardizes categories, calculates resolution time, flags unresolved and long-resolution records, assigns council districts with point-in-polygon logic, screens approximate repeat-location clusters, and generates static outputs.
 
-The burden score combines request-rate, median resolution, unresolved share, long-resolution share, and repeat-cluster share. If ACS data is available, the rate components use residents and households. If ACS data is unavailable, area density is used as the rate fallback.
+The screening score combines request-rate, median resolution, open/unclosed share, long-resolution share, and repeat-cluster share. If ACS data is available, the rate components can use residents and households. In the committed output, ACS normalization is not used and area density is used as the rate fallback.
+
+The pipeline now exports sensitivity tables for equal component weighting, non-solid-waste scoring, and category-balanced density. It also exports GIS-ready GeoJSON layers for council district scores, district QA flags, repeat clusters, and sampled request points.
 
 ## Key Findings
 
@@ -32,7 +34,9 @@ The April-June 2025 extract contains `82,743` cleaned infrastructure-related rec
 
 `Solid Waste / Recycling` is the largest category with `43,194` requests. Overall median resolution time is about `3.8` days. Overall unresolved share is about `15.5%`.
 
-The V3 council-district burden score ranks district `C` highest with a score of `80.5`, classified as `Very High`. District `H` also classifies as `Very High`.
+The V3 council-district screening score ranks district `C` highest with a rounded score of `80`, classified as `Very High`. District `H` also classifies as `Very High`.
+
+The district score table includes `82,418` of `82,743` cleaned requests. District `E` has a QA flag because many source-labeled District E records do not spatially assign to the current council-district polygons.
 
 Repeat-location screening detected `7,945` approximate coordinate/category clusters with at least three requests.
 
@@ -45,7 +49,8 @@ High scores can reflect high request rate, longer median resolution times, large
 ## Next Steps
 
 - Rerun with `CENSUS_API_KEY` to generate ACS-normalized resident and household rates.
-- Add official super-neighborhood polygons.
+- Investigate the District E spatial assignment issue against authoritative boundary and source-system definitions.
+- Rerun with a valid `CENSUS_API_KEY` to generate population/household-normalized rates.
+- Add official super-neighborhood polygons and finer-grained spatial units.
 - Build a reviewed request-type crosswalk.
-- Add ACS vulnerability overlays once Census access is available.
-- Compare multiple years to distinguish seasonal spikes from persistent burden.
+- Compare multiple years to distinguish seasonal spikes from persistent request patterns.

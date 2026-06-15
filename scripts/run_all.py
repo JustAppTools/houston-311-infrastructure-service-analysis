@@ -41,6 +41,7 @@ def main() -> None:
         run("fetch_demographics.py")
     run("clean_311_requests.py")
     run("analyze_requests.py")
+    run("export_gis_layers.py")
     run("make_maps.py")
     run("make_deliverables.py")
     print("Pipeline complete.")

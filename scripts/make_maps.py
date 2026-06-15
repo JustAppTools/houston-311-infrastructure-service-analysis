@@ -25,6 +25,21 @@ PALETTE = [
 ]
 
 
+BURDEN_COLORS = {
+    "Low": (137, 171, 112),
+    "Medium": (220, 185, 101),
+    "High": (210, 121, 84),
+    "Very High": (148, 49, 73),
+}
+
+
+REFERENCE_LABELS = [
+    ("Downtown", -95.3698, 29.7604, (12, -22)),
+    ("IH 610", -95.405, 29.818, (12, -14)),
+    ("Buffalo Bayou", -95.48, 29.765, (10, -18)),
+]
+
+
 def font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
     candidates = [
         "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
@@ -44,6 +59,16 @@ def canvas(title: str, subtitle: str = "") -> tuple[Image.Image, ImageDraw.Image
     if subtitle:
         draw.text((CANVAS["margin"], 82), subtitle, fill=CANVAS["muted"], font=font(20))
     return img, draw
+
+
+def score_class(score: float) -> str:
+    if score >= 75:
+        return "Very High"
+    if score >= 50:
+        return "High"
+    if score >= 25:
+        return "Medium"
+    return "Low"
 
 
 def load_boundaries() -> dict | None:
@@ -114,8 +139,8 @@ def draw_context_lines(
     clip_box: tuple[int, int, int, int],
 ) -> None:
     layers = [
-        (load_geojson(MAJOR_RIVERS_FILE), (116, 164, 178), 2),
-        (load_geojson(MAJOR_ROADS_FILE), (188, 192, 189), 1),
+        (load_geojson(MAJOR_RIVERS_FILE), (138, 180, 191), 1),
+        (load_geojson(MAJOR_ROADS_FILE), (214, 218, 215), 1),
     ]
     for geojson, color, width in layers:
         if not geojson:
@@ -127,6 +152,20 @@ def draw_context_lines(
                     clipped = clip_segment(p1, p2, clip_box)
                     if clipped:
                         draw.line(clipped, fill=color, width=width)
+
+
+def draw_reference_labels(draw: ImageDraw.ImageDraw, project, clip_box: tuple[int, int, int, int]) -> None:
+    left, top, right, bottom = clip_box
+    for label, lon, lat, offset in REFERENCE_LABELS:
+        x, y = project(lon, lat)
+        if not (left <= x <= right and top <= y <= bottom):
+            continue
+        dx, dy = offset
+        label_font = font(14, True)
+        tx, ty = x + dx, y + dy
+        for ox, oy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, 1)]:
+            draw.text((tx + ox, ty + oy), label, fill=(255, 255, 252), font=label_font)
+        draw.text((tx, ty), label, fill=(72, 79, 80), font=label_font)
 
 
 LABEL_OFFSETS = {
@@ -158,7 +197,10 @@ def draw_district_labels(draw: ImageDraw.ImageDraw, boundaries: dict, project, s
 def draw_north_arrow(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
     draw.line((x, y + 62, x, y + 12), fill=CANVAS["ink"], width=3)
     draw.polygon([(x, y), (x - 15, y + 34), (x, y + 25), (x + 15, y + 34)], fill=CANVAS["ink"])
-    draw.text((x - 9, y + 72), "N", fill=CANVAS["ink"], font=font(18, True))
+    label_font = font(18, True)
+    bbox = draw.textbbox((0, 0), "N", font=label_font)
+    label_w = bbox[2] - bbox[0]
+    draw.text((x - label_w / 2, y + 72), "N", fill=CANVAS["ink"], font=label_font)
 
 
 def boundary_extent(boundaries: dict | None, fallback_df: pd.DataFrame) -> tuple[float, float, float, float]:
@@ -330,12 +372,6 @@ def draw_burden_map(df: pd.DataFrame, path: Path, show_header: bool = True, show
     extent = boundary_extent(boundaries, geo)
     map_right = right - 330 if show_side_info else right
     project = make_projector(extent, (left, top, map_right, bottom))
-    colors = {
-        "Low": (137, 171, 112),
-        "Medium": (220, 185, 101),
-        "High": (210, 121, 84),
-        "Very High": (148, 49, 73),
-    }
     legend_labels = {
         "Low": "Low (<25)",
         "Medium": "Medium (25-49)",
@@ -345,17 +381,21 @@ def draw_burden_map(df: pd.DataFrame, path: Path, show_header: bool = True, show
     for feature in boundaries.get("features", []):
         district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
         row = area_by_district.get(district)
-        fill = colors.get(row["service_burden_class"] if row is not None else "", (224, 226, 222))
+        burden_class = row["service_burden_class"] if row is not None else ""
+        fill = BURDEN_COLORS.get(burden_class, (224, 226, 222))
         for ring in iter_rings(feature.get("geometry", {})):
             pts = [project(lon, lat) for lon, lat in ring]
             if len(pts) >= 3:
                 draw.polygon(pts, fill=fill, outline=(255, 255, 255))
-                draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
+                outline = (75, 82, 82)
+                width = 4 if burden_class == "Very High" else 2
+                draw.line(pts + [pts[0]], fill=outline, width=width)
     draw_context_lines(draw, project, (left, top, map_right, bottom))
+    draw_reference_labels(draw, project, (left, top, map_right, bottom))
     draw_district_labels(draw, boundaries, project, size=19)
     if show_side_info:
         legend_x = right - 280
-        for i, (label, fill) in enumerate(colors.items()):
+        for i, (label, fill) in enumerate(BURDEN_COLORS.items()):
             y = top + 24 + i * 34
             draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
             draw.text((legend_x + 34, y - 1), legend_labels[label], fill=CANVAS["ink"], font=font(18))
@@ -464,6 +504,117 @@ def draw_district_metric_choropleth(
         fill=CANVAS["muted"],
         font=font(15),
     )
+    img.save(path)
+
+
+def draw_alternate_score_choropleth(
+    table_name: str,
+    score_field: str,
+    title: str,
+    path: Path,
+    class_field: str | None = None,
+) -> None:
+    table_path = TABLES / table_name
+    if not table_path.exists():
+        return
+    data = pd.read_csv(table_path)
+    boundaries = load_boundaries()
+    img, draw = canvas(title, "Council district screening comparison; April-June 2025")
+    left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
+    draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
+    if not boundaries or score_field not in data.columns:
+        draw.text((left + 40, top + 40), "No boundary or score data available.", fill=CANVAS["ink"], font=font(24, True))
+        img.save(path)
+        return
+    extent = boundary_extent(boundaries, pd.DataFrame({"longitude": [-95.8], "latitude": [29.8]}))
+    project = make_projector(extent, (left, top, right - 300, bottom))
+    by_district = {str(row["council_district"]): row for _, row in data.iterrows()}
+    for feature in boundaries.get("features", []):
+        district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
+        row = by_district.get(district)
+        score = float(row[score_field]) if row is not None and pd.notna(row[score_field]) else 0
+        klass = str(row[class_field]) if row is not None and class_field and class_field in row else score_class(score)
+        fill = BURDEN_COLORS.get(klass, (224, 226, 222))
+        for ring in iter_rings(feature.get("geometry", {})):
+            pts = [project(lon, lat) for lon, lat in ring]
+            if len(pts) >= 3:
+                draw.polygon(pts, fill=fill, outline=(255, 255, 255))
+                draw.line(pts + [pts[0]], fill=(75, 82, 82), width=3 if klass == "Very High" else 2)
+    draw_context_lines(draw, project, (left, top, right - 300, bottom))
+    draw_district_labels(draw, boundaries, project, size=17)
+
+    legend_x = right - 265
+    draw.text((legend_x, top + 24), "Score Classes", fill=CANVAS["ink"], font=font(21, True))
+    for i, (label, fill) in enumerate(BURDEN_COLORS.items()):
+        y = top + 64 + i * 34
+        draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
+        draw.text((legend_x + 34, y - 1), label, fill=CANVAS["ink"], font=font(18))
+    top_rows = data.sort_values(score_field, ascending=False).head(5)
+    draw.text((legend_x, top + 230), "Top Ranked", fill=CANVAS["ink"], font=font(21, True))
+    y = top + 268
+    for _, row in top_rows.iterrows():
+        draw.text((legend_x, y), f"{row['council_district']}: {row[score_field]:.0f}", fill=CANVAS["ink"], font=font(17, True))
+        y += 32
+    draw.text((left, bottom + 22), "Sensitivity map; reported-request screening output, not an official City metric.", fill=CANVAS["muted"], font=font(15))
+    img.save(path)
+
+
+def draw_assignment_qa_map(path: Path) -> None:
+    table_path = TABLES / "district_data_quality.csv"
+    if not table_path.exists():
+        return
+    data = pd.read_csv(table_path)
+    boundaries = load_boundaries()
+    img, draw = canvas("Council District Assignment QA", "Spatial assignment share by source council district; April-June 2025")
+    left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
+    draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
+    if not boundaries:
+        draw.text((left + 40, top + 40), "No boundary data available.", fill=CANVAS["ink"], font=font(24, True))
+        img.save(path)
+        return
+    extent = boundary_extent(boundaries, pd.DataFrame({"longitude": [-95.8], "latitude": [29.8]}))
+    project = make_projector(extent, (left, top, right - 300, bottom))
+    by_district = {str(row["council_district"]): row for _, row in data.iterrows()}
+
+    def fill_for(value: float) -> tuple[int, int, int]:
+        if value < 0.5:
+            return (148, 49, 73)
+        if value < 0.9:
+            return (210, 121, 84)
+        if value < 0.98:
+            return (220, 185, 101)
+        return (137, 171, 112)
+
+    for feature in boundaries.get("features", []):
+        district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
+        row = by_district.get(district)
+        value = float(row["spatial_assignment_share"]) if row is not None and pd.notna(row["spatial_assignment_share"]) else 0
+        for ring in iter_rings(feature.get("geometry", {})):
+            pts = [project(lon, lat) for lon, lat in ring]
+            if len(pts) >= 3:
+                draw.polygon(pts, fill=fill_for(value), outline=(255, 255, 255))
+                draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
+    draw_context_lines(draw, project, (left, top, right - 300, bottom))
+    draw_district_labels(draw, boundaries, project, size=17)
+    legend_x = right - 265
+    draw.text((legend_x, top + 24), "Assignment Share", fill=CANVAS["ink"], font=font(21, True))
+    legend = [
+        ("<50%", (148, 49, 73)),
+        ("50-89%", (210, 121, 84)),
+        ("90-97%", (220, 185, 101)),
+        ("98%+", (137, 171, 112)),
+    ]
+    for i, (label, fill) in enumerate(legend):
+        y = top + 64 + i * 34
+        draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
+        draw.text((legend_x + 34, y - 1), label, fill=CANVAS["ink"], font=font(18))
+    draw.text((legend_x, top + 230), "Review Flag", fill=CANVAS["ink"], font=font(21, True))
+    flagged = data[data["spatial_assignment_share"] < 0.9].sort_values("spatial_assignment_share")
+    y = top + 268
+    for _, row in flagged.iterrows():
+        draw.text((legend_x, y), f"{row['council_district']}: {row['spatial_assignment_share'] * 100:.1f}%", fill=CANVAS["ink"], font=font(17, True))
+        y += 32
+    draw.text((left, bottom + 22), "QA map identifies district assignment risks; it is not part of the screening score.", fill=CANVAS["muted"], font=font(15))
     img.save(path)
 
 
@@ -617,6 +768,21 @@ def main() -> None:
         "Share of requests in repeat-location clusters",
         percent=True,
     )
+    draw_alternate_score_choropleth(
+        "council_district_non_solid_waste_screening.csv",
+        "screening_score",
+        "Non-Solid-Waste Screening Score",
+        MAPS / "non_solid_waste_screening_score.png",
+        class_field="screening_class",
+    )
+    draw_alternate_score_choropleth(
+        "category_balanced_district_density.csv",
+        "category_balanced_density_score",
+        "Category-Balanced Request Density",
+        MAPS / "category_balanced_density_score.png",
+        class_field="category_balanced_class",
+    )
+    draw_assignment_qa_map(MAPS / "district_assignment_qa_flags.png")
     draw_repeat_cluster_map(df, MAPS / "repeat_location_clusters.png")
     draw_thematic_choropleth(
         "solid_waste_recycling",

@@ -1,11 +1,14 @@
 {
   "record_count": 82743,
+  "district_score_request_count": 82418,
+  "records_not_in_district_score": 325,
   "date_min": "2025-04-01 00:16:56",
   "date_max": "2025-06-30 23:44:58",
   "coordinate_completeness": 1.0,
   "top_standardized_category": {
     "category": "Solid Waste / Recycling",
-    "count": 43194
+    "count": 43194,
+    "share": 0.5220260324136181
   },
   "median_resolution_days_overall": 3.754479166666667,
   "unresolved_share_overall": 0.15502217710259478,
@@ -52,6 +55,58 @@
     "service_burden_score": 80.45454545454545,
     "service_burden_class": "Very High"
   },
+  "top_non_solid_waste_council_district": {
+    "council_district": "C",
+    "district_area_sq_mi": 35.18519681491094,
+    "estimated_population": null,
+    "estimated_households": null,
+    "request_count": 5765,
+    "unresolved_count": 743,
+    "long_resolution_count": 544,
+    "repeat_clustered_count": 2022,
+    "median_resolution_days": 0.982476851851852,
+    "unresolved_share": 0.12888117953165654,
+    "long_resolution_share": 0.09436253252385082,
+    "repeat_cluster_share": 0.3507372072853426,
+    "requests_per_sq_mile": 163.84731426475588,
+    "requests_per_10k_residents": null,
+    "requests_per_10k_households": null,
+    "resident_rate_percentile": 100.0,
+    "household_rate_percentile": 100.0,
+    "median_resolution_percentile": 63.63636363636363,
+    "unresolved_share_percentile": 90.9090909090909,
+    "long_resolution_share_percentile": 54.54545454545454,
+    "repeat_cluster_share_percentile": 72.72727272727273,
+    "resident_request_rate_component": 25.0,
+    "household_request_rate_component": 15.0,
+    "median_resolution_days_component": 12.727272727272727,
+    "unresolved_share_component": 13.636363636363635,
+    "long_resolution_share_component": 5.454545454545454,
+    "repeat_cluster_share_component": 10.90909090909091,
+    "screening_score": 82.72727272727272,
+    "screening_class": "Very High"
+  },
+  "top_category_balanced_council_district": {
+    "council_district": "C",
+    "category_balanced_density_score": 92.85714285714286,
+    "categories_used": 7,
+    "service_burden_score": 80.45454545454545,
+    "service_burden_class": "Very High",
+    "request_count": 11945,
+    "requests_per_sq_mile": 339.4893614731152,
+    "category_balanced_class": "Very High"
+  },
+  "district_quality_alerts": [
+    {
+      "council_district": "E",
+      "request_count": 4797,
+      "records_with_coordinates": 4797,
+      "spatially_assigned_records": 1792,
+      "coordinate_completeness": 1.0,
+      "spatial_assignment_share": 0.37356681259120283,
+      "source_spatial_district_agreement": 0.9966517857142857
+    }
+  ],
   "tables": [
     "top_infrastructure_request_categories.csv",
     "median_resolution_time_by_category.csv",
@@ -63,6 +118,13 @@
     "repeat_location_clusters.csv",
     "thematic_district_burden.csv",
     "district_data_quality.csv",
-    "score_components.csv"
+    "source_spatial_assignment_matrix.csv",
+    "unscored_request_diagnostics.csv",
+    "score_components.csv",
+    "council_district_non_solid_waste_screening.csv",
+    "council_district_equal_weight_sensitivity.csv",
+    "category_balanced_density_components.csv",
+    "category_balanced_district_density.csv",
+    "score_sensitivity_rankings.csv"
   ]
 }

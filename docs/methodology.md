@@ -27,9 +27,9 @@
 
 Coordinates are rounded to three decimals, roughly a 100-meter grid in Houston. Records are flagged as repeat-clustered when at least three same-category records share a council district and rounded coordinate bin. This is a screening method, not address-level deduplication.
 
-## 4. Scoring
+## 4. Screening Score
 
-The V3 burden score uses a weighted percentile model:
+The V3 screening score uses a weighted percentile model:
 
 - request rate per 10,000 residents when ACS is available, otherwise requests per square mile: `25%`
 - request rate per 10,000 households when ACS is available, otherwise requests per square mile: `15%`
@@ -47,12 +47,25 @@ Scores are classified as:
 - `High`: 50 to less than 75
 - `Very High`: 75 or higher
 
-## 5. Outputs
+The committed output uses area-density fallback because ACS normalization did not run with a valid Census API key in this environment. `outputs/tables/score_sensitivity_rankings.csv` compares the baseline score with equal-weight, non-solid-waste, and category-balanced scenarios.
 
-The pipeline produces cleaned CSV/GeoJSON data, summary tables, category charts, point maps, repeat-cluster maps, thematic request-rate maps, and the main council-district burden choropleth.
+## 5. Sensitivity and Alternate Scores
+
+The pipeline produces several diagnostics for score robustness:
+
+- `council_district_non_solid_waste_screening.csv` excludes `Solid Waste / Recycling` and recomputes the weighted score.
+- `category_balanced_district_density.csv` averages district density percentiles across request categories so no single high-volume category dominates the density comparison.
+- `council_district_equal_weight_sensitivity.csv` recomputes the score with equal component weights.
+- `score_sensitivity_rankings.csv` compares ranks across baseline and sensitivity scenarios.
+
+## 6. Outputs
+
+The pipeline produces cleaned CSV/GeoJSON data, summary tables, GIS-ready GeoJSON layers, category charts, point maps, repeat-cluster maps, thematic request-rate maps, sensitivity maps, QA maps, and the main council-district screening choropleth.
 
 The V3.1 public showcase adds a static `index.html` page that reads generated CSV tables and displays district metrics alongside the map outputs. The page is designed for GitHub Pages and does not require a backend.
 
-## 6. Data Quality Outputs
+## 7. Data Quality Outputs
 
 `outputs/tables/district_data_quality.csv` summarizes coordinate completeness, spatial assignment share, and source-vs-spatial council district agreement by district. These metrics are audit aids and are not part of the service-burden score.
+
+`outputs/tables/source_spatial_assignment_matrix.csv` cross-tabulates source council district labels against point-in-polygon district assignments. `outputs/tables/unscored_request_diagnostics.csv` summarizes records not included in the council-district score total.

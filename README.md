@@ -1,8 +1,8 @@
 # Houston 311 Infrastructure Service Request Analysis
 
-Portfolio-ready static GIS analysis of Houston 311 infrastructure-related service requests, resolution times, repeat-location clusters, unresolved cases, and council-district service burden.
+Portfolio-ready static GIS screening analysis of reported Houston 311 infrastructure-related requests, resolution times, repeat-location clusters, open/unclosed cases, and council-district request patterns.
 
-The repository's primary showcase artifact is the static GIS service-burden map plate:
+The repository's primary showcase artifact is the static GIS request-screening map plate:
 
 ![Council district service burden map plate](deliverables/map_plates/houston_311_service_burden_map_plate.png)
 
@@ -10,7 +10,7 @@ The repository's primary showcase artifact is the static GIS service-burden map 
 
 This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a static GIS map-production package: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, formal map deliverables, metadata, and public-sector documentation.
 
-**Research question:** Which Houston areas show the highest infrastructure-service burden based on request volume, issue type, resolution time, unresolved cases, long-resolution cases, and recurring request clusters?
+**Research question:** Which Houston council districts rank highest in a bounded reported-311-request screening index based on request volume, issue type, resolution time, open/unclosed cases, long-resolution cases, and recurring request clusters?
 
 The project is designed to be understandable as a public-sector GIS case study: the code can be rerun, the assumptions are documented, and the static map/report products can be used directly in a portfolio or project write-up.
 
@@ -27,23 +27,25 @@ In this coding environment, the Census API rejected the supplied key. V3 therefo
 
 ## What The Score Means
 
-The V3 service-burden score is an analytical index. It combines request rate, resolution time, unresolved share, long-resolution share, and repeat-location share into a 0-100 style percentile score by council district. Higher scores mean a district had a heavier observed 311 infrastructure burden in this bounded extract.
+The V3 score is an analytical screening index. It combines request rate, resolution time, open/unclosed share, long-resolution share, and repeat-location share into a 0-100 style percentile score by council district. Higher scores mean a district had heavier observed reported 311 infrastructure-request activity in this bounded extract.
 
-When ACS demographics are available, request rates are normalized by estimated residents and households. When ACS is unavailable, the pipeline uses requests per square mile as a documented fallback. That makes the current output publishable, while keeping the path open for population-normalized V3.1/V4 outputs later.
+When ACS demographics are available, request rates can be normalized by estimated residents and households. In the committed output, ACS normalization is not used because the supplied Census key was rejected; the pipeline therefore uses requests per square mile as a documented fallback. That keeps the current output reproducible while leaving the path open for population-normalized V3.1/V4 outputs later.
 
-The score is not an official City of Houston metric, not a causal model, and not a complete measure of infrastructure condition.
+The score is not an official City of Houston metric, not a causal model, not a government-performance measure, and not a complete measure of infrastructure condition. 311 requests reflect reporting behavior as well as conditions.
 
 ## Key V3 Findings
 
 - The April-June 2025 extract contains `82,743` cleaned infrastructure-related records.
 - `Solid Waste / Recycling` remains the largest category with `43,194` requests.
 - Overall median resolution time among records with usable closed dates is about `3.8` days.
-- Overall unresolved share is about `15.5%`.
+- Overall open/unclosed share as of the data pull is about `15.5%`.
 - About `42.0%` of records fall in approximate repeat-location clusters.
-- Under the V3 score, council district `C` ranks `Very High`; district `H` is also `Very High`.
+- Under the V3 screening score, council district `C` ranks `Very High`; district `H` is also `Very High`. These rankings use area-density fallback and should not be read as population-normalized infrastructure burden.
+- The district score table includes `82,418` of `82,743` cleaned requests; `325` cleaned requests are outside or not included in the council-district score total.
+- District `E` has a spatial-assignment QA flag because only about `37.4%` of source-labeled District E records spatially assign to the current council-district polygons.
 - Repeat-location screening detected `7,945` approximate coordinate/category clusters with at least three requests.
 
-These are analytical findings from a bounded public-data extract, not official City performance measures.
+These are analytical findings from a bounded three-month public-data extract, not official City performance measures.
 
 ## Static GIS Deliverables
 
@@ -55,10 +57,14 @@ These are analytical findings from a bounded public-data extract, not official C
 - [Static map atlas](deliverables/map_atlas.md)
 - [PDF atlas](deliverables/houston_311_static_gis_atlas.pdf)
 - [One-page executive brief](deliverables/executive_brief.png)
+- [Grayscale/print-safe primary plate](deliverables/map_plates/houston_311_service_burden_map_plate_grayscale.png)
+- [README/web thumbnail primary plate](deliverables/map_plates/houston_311_service_burden_map_plate_thumbnail.png)
 - [Project metadata](metadata/project_metadata.md)
 - [Processing lineage](metadata/processing_lineage.md)
 - [Cartographic methodology](docs/cartographic_methodology.md)
 - [Geoprocessing workflow](docs/geoprocessing_workflow.md)
+- [Known limitations](docs/known_limitations.md)
+- [V3.4 release notes](docs/release_notes_v3.4.md)
 - [V3.3 release notes](docs/release_notes_v3.3.md)
 
 ## Supporting Outputs
@@ -77,6 +83,12 @@ The repository includes [`index.html`](index.html) as a lightweight viewer for c
 
 ![Score component small multiples](deliverables/map_plates/score_component_small_multiples.png)
 
+![Non-solid-waste screening score](outputs/maps/non_solid_waste_screening_score.png)
+
+![Category-balanced density score](outputs/maps/category_balanced_density_score.png)
+
+![District assignment QA flags](outputs/maps/district_assignment_qa_flags.png)
+
 ![Solid waste and recycling burden](outputs/maps/solid_waste_recycling_burden.png)
 
 ![Water sewer drainage burden](outputs/maps/water_sewer_drainage_burden.png)
@@ -84,6 +96,18 @@ The repository includes [`index.html`](index.html) as a lightweight viewer for c
 ![Request count by category](outputs/figures/request_count_by_category.png)
 
 More generated artifacts are listed in [`outputs/index.md`](outputs/index.md).
+
+### Sensitivity, QA, And GIS Exports
+
+- `outputs/tables/score_sensitivity_rankings.csv`
+- `outputs/tables/council_district_non_solid_waste_screening.csv`
+- `outputs/tables/category_balanced_district_density.csv`
+- `outputs/tables/source_spatial_assignment_matrix.csv`
+- `outputs/tables/unscored_request_diagnostics.csv`
+- `outputs/gis/council_district_screening_index.geojson`
+- `outputs/gis/district_assignment_qa_flags.geojson`
+- `outputs/gis/repeat_location_clusters.geojson`
+- `outputs/gis/request_points_sample.geojson`
 
 ## How To Run
 
