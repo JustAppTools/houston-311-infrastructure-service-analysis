@@ -1,12 +1,18 @@
 # Houston 311 Infrastructure Service Request Analysis
 
-GIS and data analysis of Houston 311 infrastructure-related service requests, resolution times, repeat-location clusters, unresolved cases, and council-district service burden.
+Portfolio-ready GIS and data analysis of Houston 311 infrastructure-related service requests, resolution times, repeat-location clusters, unresolved cases, and council-district service burden.
+
+The repository's primary showcase artifact is the council-district service-burden map:
+
+![Council district service burden choropleth](outputs/maps/council_district_service_burden_choropleth.png)
 
 ## Project Overview
 
 This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a technical analysis package rather than a dashboard: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, and public-sector documentation.
 
 **Research question:** Which Houston areas show the highest infrastructure-service burden based on request volume, issue type, resolution time, unresolved cases, long-resolution cases, and recurring request clusters?
+
+The project is designed to be understandable as a public-sector analytics case study: the code can be rerun, the assumptions are documented, and the main visual can be used directly in a portfolio or project write-up.
 
 ## V3 Data Scope
 
@@ -18,6 +24,14 @@ This V3 portfolio project analyzes real City of Houston 311 service request reco
 - Demographic source: 2024 ACS 5-year API and Census TIGERweb tract internal points, enabled when a valid `CENSUS_API_KEY` is available
 
 In this coding environment, the Census API rejected the supplied key. V3 therefore records the ACS access limitation and falls back to area-normalized rates. The demographic fetch script is ready to produce population and household rates once a valid `CENSUS_API_KEY` is set.
+
+## What The Score Means
+
+The V3 service-burden score is an analytical index. It combines request rate, resolution time, unresolved share, long-resolution share, and repeat-location share into a 0-100 style percentile score by council district. Higher scores mean a district had a heavier observed 311 infrastructure burden in this bounded extract.
+
+When ACS demographics are available, request rates are normalized by estimated residents and households. When ACS is unavailable, the pipeline uses requests per square mile as a documented fallback. That makes the current output publishable, while keeping the path open for population-normalized V3.1/V4 outputs later.
+
+The score is not an official City of Houston metric, not a causal model, and not a complete measure of infrastructure condition.
 
 ## Key V3 Findings
 
@@ -47,6 +61,8 @@ These are analytical findings from a bounded public-data extract, not official C
 
 ![Request count by category](outputs/figures/request_count_by_category.png)
 
+More generated artifacts are listed in [`outputs/index.md`](outputs/index.md).
+
 ## How To Run
 
 Install dependencies:
@@ -74,6 +90,12 @@ Reuse the 311 raw extract while refreshing boundaries/demographics:
 python scripts/run_all.py --skip-fetch
 ```
 
+Reuse both the 311 extract and existing context files:
+
+```bash
+python scripts/run_all.py --skip-fetch --skip-context
+```
+
 Run tests:
 
 ```bash
@@ -93,12 +115,16 @@ The main analysis settings live in `config/analysis_config.json`: date range, ma
 | Long-resolution share | 10% |
 | Repeat-cluster share | 15% |
 
+The same settings are read by the scripts, so scoring changes can be made in one auditable place.
+
 ## Repository Structure
 
 ```text
 .
 |-- README.md
 |-- Makefile
+|-- config/
+|   `-- analysis_config.json
 |-- data/
 |   |-- raw/
 |   |-- processed/
