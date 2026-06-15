@@ -129,14 +129,36 @@ def draw_context_lines(
                         draw.line(clipped, fill=color, width=width)
 
 
+LABEL_OFFSETS = {
+    "C": (-8, 8),
+    "G": (-10, -10),
+    "H": (8, -8),
+    "I": (10, 4),
+    "J": (0, 12),
+}
+
+
 def draw_district_labels(draw: ImageDraw.ImageDraw, boundaries: dict, project, size: int = 19) -> None:
     for feature in boundaries.get("features", []):
         district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
         lon, lat = feature_label_point(feature)
         x, y = project(lon, lat)
-        radius = max(13, size - 4)
-        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=(255, 255, 255), outline=(75, 82, 82), width=1)
-        draw.text((x - 6, y - size // 2), district, fill=CANVAS["ink"], font=font(size, True))
+        dx, dy = LABEL_OFFSETS.get(district, (0, 0))
+        x += dx
+        y += dy
+        radius = max(15, size - 3)
+        draw.ellipse((x - radius - 2, y - radius - 2, x + radius + 2, y + radius + 2), fill=(255, 255, 255))
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=(255, 255, 255), outline=(67, 73, 73), width=2)
+        bbox = draw.textbbox((0, 0), district, font=font(size, True))
+        text_w = bbox[2] - bbox[0]
+        text_h = bbox[3] - bbox[1]
+        draw.text((x - text_w / 2, y - text_h / 2 - 1), district, fill=CANVAS["ink"], font=font(size, True))
+
+
+def draw_north_arrow(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
+    draw.line((x, y + 62, x, y + 12), fill=CANVAS["ink"], width=3)
+    draw.polygon([(x, y), (x - 15, y + 34), (x, y + 25), (x + 15, y + 34)], fill=CANVAS["ink"])
+    draw.text((x - 9, y + 72), "N", fill=CANVAS["ink"], font=font(18, True))
 
 
 def boundary_extent(boundaries: dict | None, fallback_df: pd.DataFrame) -> tuple[float, float, float, float]:
@@ -286,7 +308,7 @@ def draw_map(df: pd.DataFrame, title: str, path: Path, color: tuple[int, int, in
     img.save(path)
 
 
-def draw_burden_map(df: pd.DataFrame, path: Path, show_header: bool = True) -> None:
+def draw_burden_map(df: pd.DataFrame, path: Path, show_header: bool = True, show_side_info: bool = True) -> None:
     area_path = TABLES / "council_district_service_burden.csv"
     driver_path = TABLES / "district_burden_drivers.csv"
     img, draw = canvas(
@@ -306,7 +328,8 @@ def draw_burden_map(df: pd.DataFrame, path: Path, show_header: bool = True) -> N
     area = pd.read_csv(area_path)
     area_by_district = {str(row["council_district"]): row for _, row in area.iterrows()}
     extent = boundary_extent(boundaries, geo)
-    project = make_projector(extent, (left, top, right - 330, bottom))
+    map_right = right - 330 if show_side_info else right
+    project = make_projector(extent, (left, top, map_right, bottom))
     colors = {
         "Low": (137, 171, 112),
         "Medium": (220, 185, 101),
@@ -328,38 +351,38 @@ def draw_burden_map(df: pd.DataFrame, path: Path, show_header: bool = True) -> N
             if len(pts) >= 3:
                 draw.polygon(pts, fill=fill, outline=(255, 255, 255))
                 draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
-    draw_context_lines(draw, project, (left, top, right - 330, bottom))
+    draw_context_lines(draw, project, (left, top, map_right, bottom))
     draw_district_labels(draw, boundaries, project, size=19)
-    legend_x = right - 280
-    for i, (label, fill) in enumerate(colors.items()):
-        y = top + 24 + i * 34
-        draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
-        draw.text((legend_x + 34, y - 1), legend_labels[label], fill=CANVAS["ink"], font=font(18))
-    draw.text((legend_x, top + 180), "Top Drivers", fill=CANVAS["ink"], font=font(22, True))
-    if driver_path.exists():
-        drivers = pd.read_csv(driver_path).head(5)
-        y = top + 214
-        for _, row in drivers.iterrows():
-            district = row["council_district"]
-            score = row["service_burden_score"]
-            district_metrics = area_by_district[str(district)]
-            resident_rate = district_metrics.get("requests_per_10k_residents")
-            density = district_metrics.get("requests_per_sq_mile")
-            unresolved = district_metrics.get("unresolved_share", 0) * 100
-            repeat = district_metrics.get("repeat_cluster_share", 0) * 100
-            top_cat = str(row["top_category"]).replace("Solid Waste / Recycling", "Solid Waste").replace("Traffic Signals / Lighting", "Signals").replace("Road / Pothole / Bridge", "Roads").replace(" / ", "/")
-            line1 = f"{district}: {score:.1f} score"
-            if pd.notna(resident_rate):
-                line2 = f"{resident_rate:,.0f}/10k res; {unresolved:.0f}% open"
-            else:
-                line2 = f"{density:,.0f}/sq mi; {unresolved:.0f}% open"
-            line3 = f"{repeat:.0f}% repeat; {top_cat[:16]}"
-            draw.text((legend_x, y), line1, fill=CANVAS["ink"], font=font(18, True))
-            draw.text((legend_x, y + 24), line2, fill=CANVAS["muted"], font=font(15))
-            draw.text((legend_x, y + 44), line3, fill=CANVAS["muted"], font=font(15))
-            y += 78
-    draw.polygon([(left + 20, bottom - 80), (left + 20, bottom - 28), (left + 35, bottom - 58)], fill=CANVAS["ink"])
-    draw.text((left + 42, bottom - 68), "N", fill=CANVAS["ink"], font=font(19, True))
+    if show_side_info:
+        legend_x = right - 280
+        for i, (label, fill) in enumerate(colors.items()):
+            y = top + 24 + i * 34
+            draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
+            draw.text((legend_x + 34, y - 1), legend_labels[label], fill=CANVAS["ink"], font=font(18))
+        draw.text((legend_x, top + 180), "Top Drivers", fill=CANVAS["ink"], font=font(22, True))
+        if driver_path.exists():
+            drivers = pd.read_csv(driver_path).head(5)
+            y = top + 214
+            for _, row in drivers.iterrows():
+                district = row["council_district"]
+                score = row["service_burden_score"]
+                district_metrics = area_by_district[str(district)]
+                resident_rate = district_metrics.get("requests_per_10k_residents")
+                density = district_metrics.get("requests_per_sq_mile")
+                unresolved = district_metrics.get("unresolved_share", 0) * 100
+                repeat = district_metrics.get("repeat_cluster_share", 0) * 100
+                top_cat = str(row["top_category"]).replace("Solid Waste / Recycling", "Solid Waste").replace("Traffic Signals / Lighting", "Signals").replace("Road / Pothole / Bridge", "Roads").replace(" / ", "/")
+                line1 = f"{district}: {score:.1f} score"
+                if pd.notna(resident_rate):
+                    line2 = f"{resident_rate:,.0f}/10k res; {unresolved:.0f}% open"
+                else:
+                    line2 = f"{density:,.0f}/sq mi; {unresolved:.0f}% open"
+                line3 = f"{repeat:.0f}% repeat; {top_cat[:16]}"
+                draw.text((legend_x, y), line1, fill=CANVAS["ink"], font=font(18, True))
+                draw.text((legend_x, y + 24), line2, fill=CANVAS["muted"], font=font(15))
+                draw.text((legend_x, y + 44), line3, fill=CANVAS["muted"], font=font(15))
+                y += 78
+    draw_north_arrow(draw, left + 34, bottom - 96)
     if show_header:
         draw.text(
             (left, bottom + 22),
@@ -566,7 +589,7 @@ def main() -> None:
     draw_map(df[df["standardized_category"].isin(["Road / Pothole / Bridge", "Sidewalk / Bike Lane", "Traffic Signals / Lighting"])], "Road, Sidewalk, Signal, and Lighting Requests", MAPS / "road_sidewalk_signal_requests.png", PALETTE[2])
     draw_map(df[(df["is_open"].astype(str).str.lower() == "true") | (df["is_long_resolution"].astype(str).str.lower() == "true")], "Open or Long-Resolution Requests", MAPS / "open_or_long_resolution_requests.png", PALETTE[3])
     draw_burden_map(df, MAPS / "council_district_service_burden_choropleth.png")
-    draw_burden_map(df, MAPS / "council_district_service_burden_map_body.png", show_header=False)
+    draw_burden_map(df, MAPS / "council_district_service_burden_map_body.png", show_header=False, show_side_info=False)
     draw_district_metric_choropleth(
         "requests_per_sq_mile",
         "Infrastructure Request Density",

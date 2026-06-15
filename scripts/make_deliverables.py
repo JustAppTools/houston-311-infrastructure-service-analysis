@@ -14,6 +14,9 @@ MAIN_MAP = MAPS / "council_district_service_burden_map_body.png"
 MAIN_MAP_FALLBACK = MAPS / "council_district_service_burden_choropleth.png"
 PLATE_FILE = MAP_PLATES / "houston_311_service_burden_map_plate.png"
 PDF_ATLAS = DELIVERABLES / "houston_311_static_gis_atlas.pdf"
+DRIVERS_FILE = TABLES / "district_burden_drivers.csv"
+DISTRICT_FILE = TABLES / "council_district_service_burden.csv"
+BOUNDARY_FILE = ROOT / "data" / "processed" / "context" / "council_district_boundaries.geojson"
 
 
 PAGE = {
@@ -26,6 +29,21 @@ PAGE = {
     "panel": (255, 255, 252),
     "accent": (31, 111, 125),
     "berry": (148, 49, 73),
+}
+
+
+SCORE_COLORS = {
+    "Low": (137, 171, 112),
+    "Medium": (220, 185, 101),
+    "High": (210, 121, 84),
+    "Very High": (148, 49, 73),
+}
+
+SCORE_LABELS = {
+    "Low": "Low (<25)",
+    "Medium": "Medium (25-49)",
+    "High": "High (50-74)",
+    "Very High": "Very High (75+)",
 }
 
 
@@ -56,6 +74,18 @@ def draw_wrapped(
             draw.text((x, y), line, fill=fill, font=text_font)
             y += line_height
     return y
+
+
+def draw_card(
+    draw: ImageDraw.ImageDraw,
+    box: tuple[int, int, int, int],
+    title: str,
+    title_size: int = 29,
+) -> tuple[int, int]:
+    x1, y1, x2, y2 = box
+    draw.rounded_rectangle(box, radius=8, fill=PAGE["panel"], outline=PAGE["line"], width=2)
+    draw.text((x1 + 28, y1 + 24), title, fill=PAGE["ink"], font=font(title_size, True))
+    return x1 + 28, y1 + 76
 
 
 def fmt_pct(value: float | None) -> str:
@@ -121,24 +151,164 @@ def draw_info_panel(draw: ImageDraw.ImageDraw, summary: dict, x: int, y: int, w:
     draw_wrapped(draw, quality_note, (x + 36, y + h - 205), 48, PAGE["muted"], font(24), 8)
 
 
+def draw_at_a_glance(draw: ImageDraw.ImageDraw, summary: dict, box: tuple[int, int, int, int]) -> None:
+    x, y = draw_card(draw, box, "At a Glance")
+    top = summary.get("top_burden_council_district") or {}
+    top_district = top.get("council_district", "n/a")
+    if top_district != "n/a":
+        top_district = f"District {top_district}"
+    metrics = [
+        (f"{summary.get('record_count', 0):,}", "Records"),
+        (str(top_district), "Top district"),
+        (fmt_pct(summary.get("unresolved_share_overall")), "Open share"),
+    ]
+    card_w = 255
+    gap = 22
+    for i, (value, label) in enumerate(metrics):
+        xx = x + i * (card_w + gap)
+        draw.rounded_rectangle((xx, y, xx + card_w, y + 128), radius=6, fill=(248, 249, 247), outline=(217, 222, 219), width=1)
+        draw.text((xx + 18, y + 20), value, fill=PAGE["ink"], font=font(34, True))
+        draw.text((xx + 18, y + 72), label, fill=PAGE["muted"], font=font(22))
+
+
+def draw_score_method(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x, y = draw_card(draw, box, "Analytical Score")
+    draw.text(
+        (x, y),
+        "Higher scores mean heavier observed 311 infrastructure burden.",
+        fill=PAGE["ink"],
+        font=font(23, True),
+    )
+    body = (
+        "The score combines request density, median resolution time, unresolved share, "
+        "long-resolution share, and repeat-location share. It is not an official City performance measure."
+    )
+    draw_wrapped(draw, body, (x, y + 42), 55, PAGE["muted"], font(22), 7)
+
+
+def draw_plate_legend(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x, y = draw_card(draw, box, "Legend")
+    for i, (label, fill) in enumerate(SCORE_COLORS.items()):
+        yy = y + i * 42
+        draw.rectangle((x, yy + 2, x + 28, yy + 30), fill=fill, outline=(120, 126, 123))
+        draw.text((x + 44, yy), SCORE_LABELS[label], fill=PAGE["ink"], font=font(23))
+
+
+def draw_top_drivers(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x, y = draw_card(draw, box, "Top Drivers")
+    if not DRIVERS_FILE.exists() or not DISTRICT_FILE.exists():
+        draw.text((x, y), "Driver tables are unavailable.", fill=PAGE["muted"], font=font(23))
+        return
+    drivers = pd.read_csv(DRIVERS_FILE).head(5)
+    districts = pd.read_csv(DISTRICT_FILE).set_index("council_district")
+    bar_x = x + 330
+    bar_w = 390
+    for rank, (_, row) in enumerate(drivers.iterrows(), start=1):
+        district = row["council_district"]
+        metrics = districts.loc[district] if district in districts.index else {}
+        density = metrics.get("requests_per_sq_mile", 0)
+        unresolved = metrics.get("unresolved_share", 0) * 100
+        repeat = metrics.get("repeat_cluster_share", 0) * 100
+        service_class = metrics.get("service_burden_class", "")
+        score = float(row["service_burden_score"])
+        fill = SCORE_COLORS.get(service_class, PAGE["accent"])
+        top_cat = str(row["top_category"]).replace("Solid Waste / Recycling", "Solid Waste").replace("Traffic Signals / Lighting", "Signals").replace("Road / Pothole / Bridge", "Roads").replace(" / ", "/")
+        draw.ellipse((x, y + 2, x + 34, y + 36), fill=fill, outline=(90, 96, 94), width=1)
+        draw.text((x + 11, y + 7), str(rank), fill=(255, 255, 255), font=font(18, True))
+        draw.text((x + 48, y), f"District {district}", fill=PAGE["ink"], font=font(23, True))
+        draw.text((x + 48, y + 31), f"{density:,.0f}/sq mi | {unresolved:.0f}% open | {repeat:.0f}% repeat", fill=PAGE["muted"], font=font(18))
+        draw.rounded_rectangle((bar_x, y + 4, bar_x + bar_w, y + 28), radius=4, fill=(235, 238, 235), outline=(217, 222, 219), width=1)
+        draw.rounded_rectangle((bar_x, y + 4, bar_x + int(bar_w * score / 100), y + 28), radius=4, fill=fill)
+        draw.text((bar_x + bar_w + 16, y + 1), f"{score:.1f}", fill=PAGE["ink"], font=font(21, True))
+        draw.text((x + 48, y + 58), f"Leading category: {top_cat[:36]}", fill=PAGE["muted"], font=font(18))
+        y += 92
+
+
+def draw_quality_note(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x, y = draw_card(draw, box, "Data Quality Note")
+    body = (
+        "District assignments use point-in-polygon against official council boundaries. "
+        "The data-quality table reports coordinate completeness and source-vs-spatial district agreement."
+    )
+    draw_wrapped(draw, body, (x, y), 54, PAGE["muted"], font(23), 7)
+
+
 def draw_scale_bar(draw: ImageDraw.ImageDraw, x: int, y: int) -> None:
     segment = 130
-    draw.text((x, y - 44), "Approximate Scale", fill=PAGE["ink"], font=font(23, True))
-    for i in range(2):
+    draw.text((x, y - 42), "Scale (approx.)", fill=PAGE["ink"], font=font(23, True))
+    for i in range(4):
         fill = PAGE["ink"] if i % 2 == 0 else PAGE["panel"]
-        draw.rectangle((x + i * segment, y, x + (i + 1) * segment, y + 28), fill=fill, outline=PAGE["ink"], width=2)
-    for i, label in enumerate(["0", "5", "10 mi"]):
+        draw.rectangle((x + i * segment, y, x + (i + 1) * segment, y + 24), fill=fill, outline=PAGE["ink"], width=2)
+    for i, label in enumerate(["0", "5", "10", "15", "20 mi"]):
         xx = x + i * segment
-        draw.line((xx, y, xx, y + 38), fill=PAGE["ink"], width=2)
-        draw.text((xx - 10, y + 48), label, fill=PAGE["ink"], font=font(20))
-    draw.text((x, y + 88), "Scale is approximate in static display layout.", fill=PAGE["muted"], font=font(19))
+        draw.line((xx, y, xx, y + 34), fill=PAGE["ink"], width=2)
+        draw.text((xx - 10, y + 42), label, fill=PAGE["ink"], font=font(19))
+    draw.text((x, y + 80), "Approximate because this plate uses a static image frame.", fill=PAGE["muted"], font=font(18))
 
 
-def paste_map_image(img: Image.Image, draw: ImageDraw.ImageDraw, source: Path, box: tuple[int, int, int, int]) -> None:
+def draw_locator_inset(draw: ImageDraw.ImageDraw, box: tuple[int, int, int, int]) -> None:
+    x1, y1, x2, y2 = box
+    draw.rounded_rectangle(box, radius=8, fill=PAGE["panel"], outline=PAGE["line"], width=2)
+    draw.text((x1 + 24, y1 + 22), "Locator", fill=PAGE["ink"], font=font(25, True))
+    if not BOUNDARY_FILE.exists():
+        draw.text((x1 + 24, y1 + 70), "Council boundary file unavailable.", fill=PAGE["muted"], font=font(19))
+        return
+    geojson = json.loads(BOUNDARY_FILE.read_text(encoding="utf-8"))
+    rings = []
+    xs, ys = [], []
+    for feature in geojson.get("features", []):
+        geom = feature.get("geometry", {})
+        coords = geom.get("coordinates", [])
+        polygons = coords if geom.get("type") == "MultiPolygon" else [coords]
+        for polygon in polygons:
+            for ring in polygon[:1]:
+                rings.append(ring)
+                for lon, lat in ring:
+                    xs.append(lon)
+                    ys.append(lat)
+    if not xs:
+        return
+    lon_min, lon_max = min(xs), max(xs)
+    lat_min, lat_max = min(ys), max(ys)
+    map_box = (x1 + 30, y1 + 66, x2 - 250, y2 - 24)
+    def project(lon: float, lat: float) -> tuple[float, float]:
+        left, top, right, bottom = map_box
+        x = left + (lon - lon_min) / (lon_max - lon_min) * (right - left)
+        y = bottom - (lat - lat_min) / (lat_max - lat_min) * (bottom - top)
+        return x, y
+    for ring in rings:
+        pts = [project(lon, lat) for lon, lat in ring]
+        if len(pts) >= 3:
+            draw.polygon(pts, fill=(236, 239, 236), outline=(124, 132, 128))
+    draw.rectangle(map_box, outline=(197, 203, 200), width=1)
+    draw.text((x2 - 218, y1 + 72), "Houston", fill=PAGE["ink"], font=font(22, True))
+    draw_wrapped(
+        draw,
+        "Council district study area within the Houston 311 archive extract.",
+        (x2 - 218, y1 + 110),
+        25,
+        PAGE["muted"],
+        font(18),
+        5,
+    )
+
+
+def paste_map_image(
+    img: Image.Image,
+    draw: ImageDraw.ImageDraw,
+    source: Path,
+    box: tuple[int, int, int, int],
+    crop: tuple[int, int, int, int] | None = None,
+) -> None:
     map_img = Image.open(source).convert("RGB")
+    if crop:
+        map_img = map_img.crop(crop)
     if source.name != "council_district_service_burden_map_body.png":
         map_img = map_img.crop((40, 28, map_img.width - 40, map_img.height - 28))
-    map_img.thumbnail((box[2] - box[0], box[3] - box[1]), Image.Resampling.LANCZOS)
+    max_w = box[2] - box[0]
+    max_h = box[3] - box[1]
+    scale = min(max_w / map_img.width, max_h / map_img.height)
+    map_img = map_img.resize((int(map_img.width * scale), int(map_img.height * scale)), Image.Resampling.LANCZOS)
     map_x = box[0] + ((box[2] - box[0]) - map_img.width) // 2
     map_y = box[1] + ((box[3] - box[1]) - map_img.height) // 2
     img.paste(map_img, (map_x, map_y))
@@ -156,27 +326,33 @@ def make_main_plate() -> None:
     draw_title_block(
         draw,
         "Houston 311 Infrastructure Service Burden",
-        "Council district choropleth | April-June 2025 | Static GIS map plate",
-        summary,
+        "Council-district service burden index using Houston 311 infrastructure requests, April-June 2025",
     )
 
-    map_box = (130, 280, 2190, 1840)
-    draw.rounded_rectangle((100, 250, 2220, 1885), radius=8, fill=(240, 243, 240), outline=PAGE["line"], width=3)
-    paste_map_image(img, draw, main_source, map_box)
+    paste_map_image(img, draw, main_source, (75, 238, 2245, 1660), crop=(92, 52, 1314, 848))
+    draw_locator_inset(draw, (75, 1710, 1085, 2075))
 
-    draw_info_panel(draw, summary, 2280, 250, 890, 1320)
-    draw_scale_bar(draw, 2320, 1655)
+    draw_at_a_glance(draw, summary, (2280, 248, 3170, 480))
+    draw_score_method(draw, (2280, 510, 3170, 760))
+    draw_plate_legend(draw, (2280, 790, 3170, 1040))
+    draw_top_drivers(draw, (2280, 1070, 3170, 1608))
+    draw_quality_note(draw, (2280, 1638, 3170, 1858))
+    draw_scale_bar(draw, 2288, 1965)
 
-    source_block = (
-        "Sources: City of Houston 311 Archive; COHGIS / Harris County council district polygons; "
-        "H-GAC major roads and rivers; 2024 ACS supported when API access is available.\n"
-        "CRS / projection note: source request coordinates are WGS84 latitude/longitude; council district "
-        "area values use source boundary geometry attributes. Static map display uses a fixed projected image frame."
+    sources = (
+        "City of Houston 311 Archive; COHGIS / Harris County council district polygons; "
+        "H-GAC major roads and rivers; 2024 ACS supported when API access is available."
     )
-    draw.rounded_rectangle((130, 2050, 3170, 2388), radius=8, fill=PAGE["panel"], outline=PAGE["line"], width=2)
-    draw.text((170, 2090), "Map Marginalia", fill=PAGE["ink"], font=font(34, True))
-    draw_wrapped(draw, source_block, (170, 2150), 150, PAGE["muted"], font(24), 8)
-    draw.text((170, 2348), "Analytical screening product; not an official City of Houston performance measure.", fill=PAGE["berry"], font=font(23, True))
+    limitations = (
+        "Source request coordinates are WGS84 latitude/longitude. Council district area values use "
+        "source boundary geometry attributes. Static map display uses a fixed projected image frame."
+    )
+    draw.rounded_rectangle((130, 2170, 3170, 2380), radius=8, fill=PAGE["panel"], outline=PAGE["line"], width=2)
+    draw.text((170, 2202), "Sources", fill=PAGE["ink"], font=font(28, True))
+    draw_wrapped(draw, sources, (170, 2255), 72, PAGE["muted"], font(20), 5)
+    draw.text((1585, 2202), "Limitations", fill=PAGE["ink"], font=font(28, True))
+    draw_wrapped(draw, limitations, (1585, 2255), 76, PAGE["muted"], font(20), 5)
+    draw.text((170, 2340), "Analytical screening product; not an official City of Houston performance measure.", fill=PAGE["berry"], font=font(20, True))
 
     img.save(PLATE_FILE)
     print(f"Wrote {PLATE_FILE}")
