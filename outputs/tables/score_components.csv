@@ -1,0 +1,67 @@
+council_district,component,component_label,weight,percentile,weighted_points,service_burden_score,service_burden_class
+C,resident_request_rate,Resident request rate or density fallback,0.25,100.0,25.0,80.45454545454545,Very High
+C,household_request_rate,Household request rate or density fallback,0.15,100.0,15.0,80.45454545454545,Very High
+C,median_resolution_days,Median resolution days,0.2,54.54545454545454,10.909090909090908,80.45454545454545,Very High
+C,unresolved_share,Unresolved share,0.15,72.72727272727273,10.90909090909091,80.45454545454545,Very High
+C,long_resolution_share,Long-resolution share,0.1,36.36363636363637,3.6363636363636367,80.45454545454545,Very High
+C,repeat_cluster_share,Repeat-cluster share,0.15,100.0,15.0,80.45454545454545,Very High
+H,resident_request_rate,Resident request rate or density fallback,0.25,90.9090909090909,22.727272727272727,78.63636363636363,Very High
+H,household_request_rate,Household request rate or density fallback,0.15,90.9090909090909,13.636363636363635,78.63636363636363,Very High
+H,median_resolution_days,Median resolution days,0.2,81.81818181818183,16.363636363636367,78.63636363636363,Very High
+H,unresolved_share,Unresolved share,0.15,90.9090909090909,13.636363636363635,78.63636363636363,Very High
+H,long_resolution_share,Long-resolution share,0.1,54.54545454545454,5.454545454545454,78.63636363636363,Very High
+H,repeat_cluster_share,Repeat-cluster share,0.15,45.45454545454545,6.8181818181818175,78.63636363636363,Very High
+D,resident_request_rate,Resident request rate or density fallback,0.25,81.81818181818183,20.454545454545457,65.90909090909092,High
+D,household_request_rate,Household request rate or density fallback,0.15,81.81818181818183,12.272727272727273,65.90909090909092,High
+D,median_resolution_days,Median resolution days,0.2,45.45454545454545,9.090909090909092,65.90909090909092,High
+D,unresolved_share,Unresolved share,0.15,27.27272727272727,4.09090909090909,65.90909090909092,High
+D,long_resolution_share,Long-resolution share,0.1,90.9090909090909,9.090909090909092,65.90909090909092,High
+D,repeat_cluster_share,Repeat-cluster share,0.15,72.72727272727273,10.90909090909091,65.90909090909092,High
+B,resident_request_rate,Resident request rate or density fallback,0.25,27.27272727272727,6.8181818181818175,60.909090909090914,High
+B,household_request_rate,Household request rate or density fallback,0.15,27.27272727272727,4.09090909090909,60.909090909090914,High
+B,median_resolution_days,Median resolution days,0.2,90.9090909090909,18.181818181818183,60.909090909090914,High
+B,unresolved_share,Unresolved share,0.15,100.0,15.0,60.909090909090914,High
+B,long_resolution_share,Long-resolution share,0.1,72.72727272727273,7.272727272727273,60.909090909090914,High
+B,repeat_cluster_share,Repeat-cluster share,0.15,63.63636363636363,9.545454545454545,60.909090909090914,High
+I,resident_request_rate,Resident request rate or density fallback,0.25,72.72727272727273,18.181818181818183,55.0,High
+I,household_request_rate,Household request rate or density fallback,0.15,72.72727272727273,10.90909090909091,55.0,High
+I,median_resolution_days,Median resolution days,0.2,63.63636363636363,12.727272727272727,55.0,High
+I,unresolved_share,Unresolved share,0.15,9.090909090909092,1.3636363636363638,55.0,High
+I,long_resolution_share,Long-resolution share,0.1,63.63636363636363,6.363636363636363,55.0,High
+I,repeat_cluster_share,Repeat-cluster share,0.15,36.36363636363637,5.454545454545455,55.0,High
+A,resident_request_rate,Resident request rate or density fallback,0.25,18.181818181818183,4.545454545454546,52.27272727272727,High
+A,household_request_rate,Household request rate or density fallback,0.15,18.181818181818183,2.7272727272727275,52.27272727272727,High
+A,median_resolution_days,Median resolution days,0.2,100.0,20.0,52.27272727272727,High
+A,unresolved_share,Unresolved share,0.15,45.45454545454545,6.8181818181818175,52.27272727272727,High
+A,long_resolution_share,Long-resolution share,0.1,100.0,10.0,52.27272727272727,High
+A,repeat_cluster_share,Repeat-cluster share,0.15,54.54545454545454,8.18181818181818,52.27272727272727,High
+K,resident_request_rate,Resident request rate or density fallback,0.25,63.63636363636363,15.909090909090908,50.90909090909091,High
+K,household_request_rate,Household request rate or density fallback,0.15,63.63636363636363,9.545454545454545,50.90909090909091,High
+K,median_resolution_days,Median resolution days,0.2,36.36363636363637,7.272727272727273,50.90909090909091,High
+K,unresolved_share,Unresolved share,0.15,63.63636363636363,9.545454545454545,50.90909090909091,High
+K,long_resolution_share,Long-resolution share,0.1,45.45454545454545,4.545454545454546,50.90909090909091,High
+K,repeat_cluster_share,Repeat-cluster share,0.15,27.27272727272727,4.09090909090909,50.90909090909091,High
+J,resident_request_rate,Resident request rate or density fallback,0.25,54.54545454545454,13.636363636363635,44.99999999999999,Medium
+J,household_request_rate,Household request rate or density fallback,0.15,54.54545454545454,8.18181818181818,44.99999999999999,Medium
+J,median_resolution_days,Median resolution days,0.2,27.27272727272727,5.454545454545454,44.99999999999999,Medium
+J,unresolved_share,Unresolved share,0.15,81.81818181818183,12.272727272727273,44.99999999999999,Medium
+J,long_resolution_share,Long-resolution share,0.1,27.27272727272727,2.727272727272727,44.99999999999999,Medium
+J,repeat_cluster_share,Repeat-cluster share,0.15,18.181818181818183,2.7272727272727275,44.99999999999999,Medium
+G,resident_request_rate,Resident request rate or density fallback,0.25,45.45454545454545,11.363636363636363,40.90909090909091,Medium
+G,household_request_rate,Household request rate or density fallback,0.15,45.45454545454545,6.8181818181818175,40.90909090909091,Medium
+G,median_resolution_days,Median resolution days,0.2,9.090909090909092,1.8181818181818183,40.90909090909091,Medium
+G,unresolved_share,Unresolved share,0.15,36.36363636363637,5.454545454545455,40.90909090909091,Medium
+G,long_resolution_share,Long-resolution share,0.1,18.181818181818183,1.8181818181818183,40.90909090909091,Medium
+G,repeat_cluster_share,Repeat-cluster share,0.15,90.9090909090909,13.636363636363635,40.90909090909091,Medium
+F,resident_request_rate,Resident request rate or density fallback,0.25,36.36363636363637,9.090909090909092,39.54545454545455,Medium
+F,household_request_rate,Household request rate or density fallback,0.15,36.36363636363637,5.454545454545455,39.54545454545455,Medium
+F,median_resolution_days,Median resolution days,0.2,18.181818181818183,3.6363636363636367,39.54545454545455,Medium
+F,unresolved_share,Unresolved share,0.15,54.54545454545454,8.18181818181818,39.54545454545455,Medium
+F,long_resolution_share,Long-resolution share,0.1,9.090909090909092,0.9090909090909092,39.54545454545455,Medium
+F,repeat_cluster_share,Repeat-cluster share,0.15,81.81818181818183,12.272727272727273,39.54545454545455,Medium
+E,resident_request_rate,Resident request rate or density fallback,0.25,9.090909090909092,2.272727272727273,30.454545454545457,Medium
+E,household_request_rate,Household request rate or density fallback,0.15,9.090909090909092,1.3636363636363638,30.454545454545457,Medium
+E,median_resolution_days,Median resolution days,0.2,72.72727272727273,14.545454545454547,30.454545454545457,Medium
+E,unresolved_share,Unresolved share,0.15,18.181818181818183,2.7272727272727275,30.454545454545457,Medium
+E,long_resolution_share,Long-resolution share,0.1,81.81818181818183,8.181818181818183,30.454545454545457,Medium
+E,repeat_cluster_share,Repeat-cluster share,0.15,9.090909090909092,1.3636363636363638,30.454545454545457,Medium

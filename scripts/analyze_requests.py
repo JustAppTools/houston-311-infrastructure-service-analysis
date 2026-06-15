@@ -237,19 +237,58 @@ def main() -> None:
         area["request_count"],
         area.get("estimated_households", pd.Series(np.nan, index=area.index)),
     )
-    area["service_burden_score"] = (
-        percentile_rank(area["requests_per_10k_residents"].fillna(area["requests_per_sq_mile"])) * SCORE_WEIGHTS["resident_request_rate"]
-        + percentile_rank(area["requests_per_10k_households"].fillna(area["requests_per_sq_mile"])) * SCORE_WEIGHTS["household_request_rate"]
-        + percentile_rank(area["median_resolution_days"]) * SCORE_WEIGHTS["median_resolution_days"]
-        + percentile_rank(area["unresolved_share"]) * SCORE_WEIGHTS["unresolved_share"]
-        + percentile_rank(area["long_resolution_share"]) * SCORE_WEIGHTS["long_resolution_share"]
-        + percentile_rank(area["repeat_cluster_share"]) * SCORE_WEIGHTS["repeat_cluster_share"]
+    area["resident_rate_percentile"] = percentile_rank(
+        area["requests_per_10k_residents"].fillna(area["requests_per_sq_mile"])
+    )
+    area["household_rate_percentile"] = percentile_rank(
+        area["requests_per_10k_households"].fillna(area["requests_per_sq_mile"])
+    )
+    area["median_resolution_percentile"] = percentile_rank(area["median_resolution_days"])
+    area["unresolved_share_percentile"] = percentile_rank(area["unresolved_share"])
+    area["long_resolution_share_percentile"] = percentile_rank(area["long_resolution_share"])
+    area["repeat_cluster_share_percentile"] = percentile_rank(area["repeat_cluster_share"])
+    component_specs = [
+        ("resident_request_rate", "resident_rate_percentile"),
+        ("household_request_rate", "household_rate_percentile"),
+        ("median_resolution_days", "median_resolution_percentile"),
+        ("unresolved_share", "unresolved_share_percentile"),
+        ("long_resolution_share", "long_resolution_share_percentile"),
+        ("repeat_cluster_share", "repeat_cluster_share_percentile"),
+    ]
+    for component, percentile_col in component_specs:
+        area[f"{component}_component"] = area[percentile_col] * SCORE_WEIGHTS[component]
+    area["service_burden_score"] = sum(
+        area[f"{component}_component"] for component, _ in component_specs
     )
     area["service_burden_class"] = area["service_burden_score"].apply(burden_class)
     area_sorted = area.sort_values("service_burden_score", ascending=False)
     area_sorted.to_csv(
         TABLES / "council_district_service_burden.csv", index=False
     )
+    component_rows = []
+    component_labels = {
+        "resident_request_rate": "Resident request rate or density fallback",
+        "household_request_rate": "Household request rate or density fallback",
+        "median_resolution_days": "Median resolution days",
+        "unresolved_share": "Unresolved share",
+        "long_resolution_share": "Long-resolution share",
+        "repeat_cluster_share": "Repeat-cluster share",
+    }
+    for _, row in area_sorted.iterrows():
+        for component, percentile_col in component_specs:
+            component_rows.append(
+                {
+                    "council_district": row["council_district"],
+                    "component": component,
+                    "component_label": component_labels[component],
+                    "weight": SCORE_WEIGHTS[component],
+                    "percentile": row[percentile_col],
+                    "weighted_points": row[f"{component}_component"],
+                    "service_burden_score": row["service_burden_score"],
+                    "service_burden_class": row["service_burden_class"],
+                }
+            )
+    pd.DataFrame(component_rows).to_csv(TABLES / "score_components.csv", index=False)
 
     thematic_rows = []
     for theme, categories in THEME_GROUPS.items():
@@ -347,6 +386,7 @@ def main() -> None:
             "repeat_location_clusters.csv",
             "thematic_district_burden.csv",
             "district_data_quality.csv",
+            "score_components.csv",
         ],
     }
     SUMMARY_FILE.write_text(json.dumps(json_safe(summary), indent=2), encoding="utf-8")

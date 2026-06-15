@@ -3,6 +3,9 @@
 ## Main Showcase Visual
 
 - `deliverables/map_plates/houston_311_service_burden_map_plate.png` - formal static GIS map plate for the project.
+- `deliverables/map_plates/score_component_small_multiples.png` - four-panel score component sheet.
+- `deliverables/houston_311_static_gis_atlas.pdf` - static PDF atlas assembled from map plates.
+- `deliverables/executive_brief.png` - one-page static GIS executive brief.
 - `outputs/maps/council_district_service_burden_choropleth.png` - the primary portfolio visual. It ranks council districts by the V3 service-burden score and includes top driver notes.
 - `deliverables/static_gis_report.md` - static GIS report.
 - `deliverables/map_atlas.md` - atlas index for map and figure outputs.
@@ -18,6 +21,10 @@
 - `outputs/maps/solid_waste_recycling_burden.png` - thematic district rate map.
 - `outputs/maps/water_sewer_drainage_burden.png` - thematic district rate map.
 - `outputs/maps/roads_signals_sidewalks_burden.png` - thematic district rate map.
+- `outputs/maps/request_density_component.png` - score component map.
+- `outputs/maps/unresolved_share_component.png` - score component map.
+- `outputs/maps/long_resolution_share_component.png` - score component map.
+- `outputs/maps/repeat_cluster_share_component.png` - score component map.
 
 ## Figures
 
@@ -33,4 +40,5 @@
 - `outputs/tables/repeat_location_clusters.csv` - detected repeat-location clusters.
 - `outputs/tables/thematic_district_burden.csv` - district metrics for thematic maps.
 - `outputs/tables/district_data_quality.csv` - district-level coordinate and spatial-assignment quality checks.
+- `outputs/tables/score_components.csv` - score component percentiles and weighted points by district.
 - Other table outputs summarize categories, resolution, unresolved share, long-resolution share, and monthly volume.

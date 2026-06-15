@@ -23,6 +23,9 @@ April 1, 2025 through June 30, 2025.
 ## Primary Outputs
 
 - `deliverables/map_plates/houston_311_service_burden_map_plate.png`
+- `deliverables/map_plates/score_component_small_multiples.png`
+- `deliverables/houston_311_static_gis_atlas.pdf`
+- `deliverables/executive_brief.png`
 - `deliverables/static_gis_report.md`
 - `deliverables/map_atlas.md`
 - `outputs/maps/council_district_service_burden_choropleth.png`

@@ -53,10 +53,13 @@ These are analytical findings from a bounded public-data extract, not official C
 
 - [Static GIS report](deliverables/static_gis_report.md)
 - [Static map atlas](deliverables/map_atlas.md)
+- [PDF atlas](deliverables/houston_311_static_gis_atlas.pdf)
+- [One-page executive brief](deliverables/executive_brief.png)
 - [Project metadata](metadata/project_metadata.md)
 - [Processing lineage](metadata/processing_lineage.md)
 - [Cartographic methodology](docs/cartographic_methodology.md)
 - [Geoprocessing workflow](docs/geoprocessing_workflow.md)
+- [V3.3 release notes](docs/release_notes_v3.3.md)
 
 ## Supporting Outputs
 
@@ -71,6 +74,8 @@ The repository includes [`index.html`](index.html) as a lightweight viewer for c
 ### Supporting Visuals
 
 ![Repeat location clusters](outputs/maps/repeat_location_clusters.png)
+
+![Score component small multiples](deliverables/map_plates/score_component_small_multiples.png)
 
 ![Solid waste and recycling burden](outputs/maps/solid_waste_recycling_burden.png)
 
@@ -159,6 +164,8 @@ The same settings are read by the scripts, so scoring changes can be made in one
 |   `-- analysis_config.json
 |-- deliverables/
 |   |-- map_plates/
+|   |-- executive_brief.png
+|   |-- houston_311_static_gis_atlas.pdf
 |   |-- map_atlas.md
 |   `-- static_gis_report.md
 |-- data/
@@ -206,6 +213,7 @@ The same settings are read by the scripts, so scoring changes can be made in one
 - Official council-district choropleth mapping
 - Static chart and map production
 - Static GIS map plate and atlas production
+- Score component map and table production
 - GIS metadata and processing-lineage documentation
 - GitHub Actions CI and Pages deployment
 - Public-sector technical writing and limitations documentation

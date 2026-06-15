@@ -35,3 +35,4 @@ Derived,quality_flags,Record-level QA/QC flags,Pipe-delimited flags for missing 
 Derived,coordinate_completeness,District-level coordinate completeness,records_with_coordinates divided by request_count in outputs/tables/district_data_quality.csv,Audit metric not used in score
 Derived,spatial_assignment_share,District-level spatial assignment share,spatially_assigned_records divided by request_count in outputs/tables/district_data_quality.csv,Audit metric not used in score
 Derived,source_spatial_district_agreement,District source-vs-spatial agreement,share of comparable records where source_council_district equals spatial_council_district,Audit metric not used in score
+Derived,score_components.csv,Score component table,Component percentiles and weighted points by council district,Used to explain the composite service-burden score

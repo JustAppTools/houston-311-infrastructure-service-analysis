@@ -30,10 +30,25 @@ The pipeline filters 311 records to infrastructure-related request types, cleans
 ## Static GIS Deliverables
 
 - `deliverables/map_plates/houston_311_service_burden_map_plate.png`
+- `deliverables/map_plates/repeat_location_cluster_map_plate.png`
+- `deliverables/map_plates/score_component_small_multiples.png`
+- `deliverables/houston_311_static_gis_atlas.pdf`
+- `deliverables/executive_brief.png`
 - `deliverables/map_atlas.md`
 - `outputs/maps/*.png`
 - `outputs/figures/*.png`
 - `outputs/tables/*.csv`
+
+## Score Components
+
+The composite score is supported by `outputs/tables/score_components.csv` and four static component maps:
+
+- request density
+- unresolved request share
+- long-resolution request share
+- repeat-cluster request share
+
+These outputs help explain whether a high burden score is driven mainly by request density, slow resolution, open cases, or recurring locations.
 
 ## Limitations
 

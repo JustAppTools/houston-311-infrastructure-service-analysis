@@ -4,6 +4,9 @@
 
 - Reframed the project around static GIS analysis and map production.
 - Added `deliverables/` with a formal map plate, static GIS report, and map atlas.
+- Added multiple formal map plates, a score-component small-multiple sheet, a one-page executive brief, and a static PDF atlas.
+- Added score-component table and component choropleth maps.
+- Added V3.3 release notes for the static atlas expansion.
 - Added `metadata/` with project metadata, source-layer notes, and processing lineage.
 - Added cartographic methodology and geoprocessing workflow documentation.
 - Added `scripts/make_deliverables.py` and wired it into the reproducible pipeline.

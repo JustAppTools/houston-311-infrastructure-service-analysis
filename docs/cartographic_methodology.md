@@ -29,3 +29,7 @@ Formal map plates include title, subtitle, source note, classification note, CRS
 ## Interpretation Limits
 
 Map classes describe patterns visible in the 311 extract. They do not prove infrastructure condition, service failure, resident satisfaction, or causal inequity.
+
+## Atlas Products
+
+The static atlas includes a primary burden plate, thematic plates, repeat-location plate, and score-component small multiples. The component sheet uses separate quartiles for each metric, so color classes should be read within each panel rather than compared directly across panels.

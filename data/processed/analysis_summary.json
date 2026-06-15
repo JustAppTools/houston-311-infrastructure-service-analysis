@@ -37,6 +37,18 @@
     "requests_per_sq_mile": 339.4893614731152,
     "requests_per_10k_residents": null,
     "requests_per_10k_households": null,
+    "resident_rate_percentile": 100.0,
+    "household_rate_percentile": 100.0,
+    "median_resolution_percentile": 54.54545454545454,
+    "unresolved_share_percentile": 72.72727272727273,
+    "long_resolution_share_percentile": 36.36363636363637,
+    "repeat_cluster_share_percentile": 100.0,
+    "resident_request_rate_component": 25.0,
+    "household_request_rate_component": 15.0,
+    "median_resolution_days_component": 10.909090909090908,
+    "unresolved_share_component": 10.90909090909091,
+    "long_resolution_share_component": 3.6363636363636367,
+    "repeat_cluster_share_component": 15.0,
     "service_burden_score": 80.45454545454545,
     "service_burden_class": "Very High"
   },
@@ -50,6 +62,7 @@
     "district_burden_drivers.csv",
     "repeat_location_clusters.csv",
     "thematic_district_burden.csv",
-    "district_data_quality.csv"
+    "district_data_quality.csv",
+    "score_components.csv"
   ]
 }

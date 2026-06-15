@@ -56,6 +56,33 @@ class CoreLogicTests(unittest.TestCase):
         self.assertTrue(point_in_geometry(0, 0, square))
         self.assertFalse(point_in_geometry(2, 0, square))
 
+    def test_required_static_gis_outputs_exist(self):
+        required = [
+            ROOT / "deliverables" / "map_plates" / "houston_311_service_burden_map_plate.png",
+            ROOT / "deliverables" / "map_plates" / "score_component_small_multiples.png",
+            ROOT / "deliverables" / "houston_311_static_gis_atlas.pdf",
+            ROOT / "outputs" / "tables" / "score_components.csv",
+            ROOT / "outputs" / "maps" / "request_density_component.png",
+        ]
+        missing = [str(path) for path in required if not path.exists()]
+        self.assertEqual(missing, [])
+
+    def test_score_component_schema(self):
+        path = ROOT / "outputs" / "tables" / "score_components.csv"
+        components = pd.read_csv(path)
+        expected = {
+            "council_district",
+            "component",
+            "component_label",
+            "weight",
+            "percentile",
+            "weighted_points",
+            "service_burden_score",
+            "service_burden_class",
+        }
+        self.assertTrue(expected.issubset(set(components.columns)))
+        self.assertEqual(len(components), 66)
+
 
 if __name__ == "__main__":
     unittest.main()
