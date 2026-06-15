@@ -1,0 +1,33 @@
+{
+  "record_count": 33172,
+  "date_min": "2025-06-01 00:03:22",
+  "date_max": "2025-06-30 23:44:58",
+  "coordinate_completeness": 1.0,
+  "top_standardized_category": {
+    "category": "Solid Waste / Recycling",
+    "count": 19707
+  },
+  "median_resolution_days_overall": 6.792314814814815,
+  "unresolved_share_overall": 0.1412637163873146,
+  "long_resolution_share_overall": 0.24225250211021343,
+  "top_burden_council_district": {
+    "council_district": "C",
+    "request_count": 5075,
+    "unresolved_count": 729,
+    "long_resolution_count": 1280,
+    "median_resolution_days": 8.21087962962963,
+    "records_with_coordinates": 5075,
+    "unresolved_share": 0.14364532019704435,
+    "long_resolution_share": 0.2522167487684729,
+    "service_burden_score": 84.58333333333333,
+    "service_burden_class": "Very High"
+  },
+  "tables": [
+    "top_infrastructure_request_categories.csv",
+    "median_resolution_time_by_category.csv",
+    "unresolved_open_requests_by_category.csv",
+    "long_resolution_categories.csv",
+    "monthly_request_volume.csv",
+    "council_district_service_burden.csv"
+  ]
+}
