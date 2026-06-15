@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data policy
+data/raw/*.csv
+data/raw/*.geojson
+data/raw/*.jsonl

@@ -1,0 +1,29 @@
+{
+  "acs_year": "2024",
+  "acs_dataset": "acs/acs5",
+  "acs_variables": {
+    "B01003_001E": "population",
+    "B11001_001E": "households",
+    "B19013_001E": "median_household_income",
+    "B17001_001E": "poverty_universe",
+    "B17001_002E": "poverty_count",
+    "B25044_001E": "vehicle_universe",
+    "B25044_003E": "owner_no_vehicle",
+    "B25044_010E": "renter_no_vehicle"
+  },
+  "census_api_url": "https://api.census.gov/data/2024/acs/acs5",
+  "tract_layer_url": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Tracts_Blocks/MapServer/7",
+  "counties": [
+    "201",
+    "157",
+    "339"
+  ],
+  "tracts_downloaded": 0,
+  "tract_centroids_assigned_to_council_districts": 0,
+  "district_rows_written": 0,
+  "used_api_key": true,
+  "access_error": "Census API returned non-JSON response: Invalid Key",
+  "access_limitation": "The Census API returned a non-JSON response in this environment. Set CENSUS_API_KEY and rerun scripts/fetch_demographics.py to enable ACS population and household rates.",
+  "downloaded_at_utc": "2026-06-15T00:52:02.111174+00:00",
+  "method_note": "District demographics are approximated by assigning ACS tract internal points to official council district polygons. This is not areal interpolation."
+}

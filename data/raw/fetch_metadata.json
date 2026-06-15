@@ -1,0 +1,13 @@
+{
+  "source_name": "City of Houston Houston311_Archives ArcGIS MapServer layer",
+  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/311/Houston311_Archives/MapServer/0",
+  "query_where": "Created_Date_Local >= DATE '2025-04-01' AND Created_Date_Local < DATE '2025-07-01' AND (Incident_Case_Type LIKE '%Water%' OR Incident_Case_Type LIKE '%Sewer%' OR Incident_Case_Type LIKE '%Drainage%' OR Incident_Case_Type LIKE '%Flood%' OR Incident_Case_Type LIKE '%Pothole%' OR Incident_Case_Type LIKE '%Sidewalk%' OR Incident_Case_Type LIKE '%Traffic%' OR Incident_Case_Type LIKE '%Signal%' OR Incident_Case_Type LIKE '%Light%' OR Incident_Case_Type LIKE '%Dump%' OR Incident_Case_Type LIKE '%Trash%' OR Incident_Case_Type LIKE '%Recycling%' OR Incident_Case_Type LIKE '%Garbage%' OR Incident_Case_Type LIKE '%Bridge%' OR Incident_Case_Type LIKE '%Street%' OR Incident_Case_Type LIKE '%Debris%' OR Incident_Case_Type LIKE '%Container%')",
+  "start_date": "2025-04-01",
+  "end_date": "2025-07-01",
+  "max_records_requested": 100000,
+  "source_count_for_query": 82743,
+  "records_downloaded": 82743,
+  "downloaded_at_utc": "2026-06-15T00:11:57.384957+00:00",
+  "access_error": null,
+  "note": "Raw CSV is generated locally and ignored by git to avoid committing bulky source extracts."
+}

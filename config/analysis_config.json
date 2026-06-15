@@ -1,0 +1,21 @@
+{
+  "date_range": {
+    "start_date": "2025-04-01",
+    "end_date_exclusive": "2025-07-01"
+  },
+  "data_fetch": {
+    "max_records": 100000
+  },
+  "quality_thresholds": {
+    "long_resolution_days": 14,
+    "repeat_cluster_min_count": 3
+  },
+  "score_weights": {
+    "resident_request_rate": 0.25,
+    "household_request_rate": 0.15,
+    "median_resolution_days": 0.20,
+    "unresolved_share": 0.15,
+    "long_resolution_share": 0.10,
+    "repeat_cluster_share": 0.15
+  }
+}
