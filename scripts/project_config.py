@@ -1,6 +1,9 @@
 from pathlib import Path
+import json
 
 ROOT = Path(__file__).resolve().parents[1]
+CONFIG_DIR = ROOT / "config"
+CONFIG_FILE = CONFIG_DIR / "analysis_config.json"
 DATA_RAW = ROOT / "data" / "raw"
 DATA_PROCESSED = ROOT / "data" / "processed"
 DATA_CONTEXT = DATA_PROCESSED / "context"
@@ -22,10 +25,20 @@ COUNCIL_DISTRICTS_URL = (
     "https://www.gis.hctx.net/arcgis/rest/services/CoH/"
     "CoH_Boundaries/MapServer/0"
 )
+HGAC_MAJOR_ROADS_URL = "https://gis.h-gac.com/arcgis/rest/services/Open_Data/Transportation/MapServer/9"
+HGAC_MAJOR_RIVERS_URL = "https://gis.h-gac.com/arcgis/rest/services/Open_Data/Environment/MapServer/1"
 
-DEFAULT_START_DATE = "2025-04-01"
-DEFAULT_END_DATE = "2025-07-01"
-DEFAULT_MAX_RECORDS = 100000
+def load_analysis_config() -> dict:
+    if not CONFIG_FILE.exists():
+        return {}
+    return json.loads(CONFIG_FILE.read_text(encoding="utf-8"))
+
+
+ANALYSIS_CONFIG = load_analysis_config()
+
+DEFAULT_START_DATE = ANALYSIS_CONFIG.get("date_range", {}).get("start_date", "2025-04-01")
+DEFAULT_END_DATE = ANALYSIS_CONFIG.get("date_range", {}).get("end_date_exclusive", "2025-07-01")
+DEFAULT_MAX_RECORDS = int(ANALYSIS_CONFIG.get("data_fetch", {}).get("max_records", 100000))
 PAGE_SIZE = 1000
 
 OUT_FIELDS = [
@@ -78,8 +91,17 @@ CATEGORY_RULES = [
     ("Solid Waste / Recycling", ["trash", "recycling", "garbage", "container", "debris", "dump", "pickup"]),
 ]
 
-LONG_RESOLUTION_DAYS = 14
-REPEAT_CLUSTER_MIN_COUNT = 3
+LONG_RESOLUTION_DAYS = int(ANALYSIS_CONFIG.get("quality_thresholds", {}).get("long_resolution_days", 14))
+REPEAT_CLUSTER_MIN_COUNT = int(ANALYSIS_CONFIG.get("quality_thresholds", {}).get("repeat_cluster_min_count", 3))
+SCORE_WEIGHTS = {
+    "resident_request_rate": 0.25,
+    "household_request_rate": 0.15,
+    "median_resolution_days": 0.20,
+    "unresolved_share": 0.15,
+    "long_resolution_share": 0.10,
+    "repeat_cluster_share": 0.15,
+}
+SCORE_WEIGHTS.update(ANALYSIS_CONFIG.get("score_weights", {}))
 
 CANVAS = {
     "width": 1400,
@@ -95,5 +117,5 @@ CANVAS = {
 
 
 def ensure_directories() -> None:
-    for path in [DATA_RAW, DATA_PROCESSED, DATA_CONTEXT, TABLES, FIGURES, MAPS, DOCS]:
+    for path in [CONFIG_DIR, DATA_RAW, DATA_PROCESSED, DATA_CONTEXT, TABLES, FIGURES, MAPS, DOCS]:
         path.mkdir(parents=True, exist_ok=True)

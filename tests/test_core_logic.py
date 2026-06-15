@@ -2,12 +2,16 @@ import sys
 import unittest
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from clean_311_requests import classify_category, is_open_status
-from analyze_requests import burden_class
+from analyze_requests import burden_class, percentile_rank, rate_per_10k
+from project_config import SCORE_WEIGHTS
 from spatial_utils import point_in_geometry
 
 
@@ -27,6 +31,18 @@ class CoreLogicTests(unittest.TestCase):
         self.assertEqual(burden_class(30), "Medium")
         self.assertEqual(burden_class(60), "High")
         self.assertEqual(burden_class(80), "Very High")
+
+    def test_configured_score_weights_sum_to_one(self):
+        self.assertAlmostEqual(sum(SCORE_WEIGHTS.values()), 1.0)
+
+    def test_rate_per_10k_handles_missing_denominator(self):
+        rates = rate_per_10k(numerator=pd.Series([5, 10]), denominator=pd.Series([1000, 0]))
+        self.assertAlmostEqual(rates[0], 50.0)
+        self.assertTrue(np.isnan(rates[1]))
+
+    def test_percentile_rank_zeroes_flat_series(self):
+        ranked = percentile_rank(pd.Series([3, 3, 3]))
+        self.assertEqual(ranked.tolist(), [0, 0, 0])
 
     def test_point_in_polygon(self):
         square = {

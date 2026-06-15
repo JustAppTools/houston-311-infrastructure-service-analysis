@@ -3,7 +3,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from project_config import DATA_CONTEXT, DATA_PROCESSED, TABLES, ensure_directories
+from project_config import DATA_CONTEXT, DATA_PROCESSED, SCORE_WEIGHTS, TABLES, ensure_directories
 
 
 CLEAN_FILE = DATA_PROCESSED / "houston_311_infrastructure_requests_cleaned.csv"
@@ -197,12 +197,12 @@ def main() -> None:
         area.get("estimated_households", pd.Series(np.nan, index=area.index)),
     )
     area["service_burden_score"] = (
-        percentile_rank(area["requests_per_10k_residents"].fillna(area["requests_per_sq_mile"])) * 0.25
-        + percentile_rank(area["requests_per_10k_households"].fillna(area["requests_per_sq_mile"])) * 0.15
-        + percentile_rank(area["median_resolution_days"]) * 0.20
-        + percentile_rank(area["unresolved_share"]) * 0.15
-        + percentile_rank(area["long_resolution_share"]) * 0.10
-        + percentile_rank(area["repeat_cluster_share"]) * 0.15
+        percentile_rank(area["requests_per_10k_residents"].fillna(area["requests_per_sq_mile"])) * SCORE_WEIGHTS["resident_request_rate"]
+        + percentile_rank(area["requests_per_10k_households"].fillna(area["requests_per_sq_mile"])) * SCORE_WEIGHTS["household_request_rate"]
+        + percentile_rank(area["median_resolution_days"]) * SCORE_WEIGHTS["median_resolution_days"]
+        + percentile_rank(area["unresolved_share"]) * SCORE_WEIGHTS["unresolved_share"]
+        + percentile_rank(area["long_resolution_share"]) * SCORE_WEIGHTS["long_resolution_share"]
+        + percentile_rank(area["repeat_cluster_share"]) * SCORE_WEIGHTS["repeat_cluster_share"]
     )
     area["service_burden_class"] = area["service_burden_score"].apply(burden_class)
     area_sorted = area.sort_values("service_burden_score", ascending=False)

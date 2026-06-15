@@ -6,7 +6,9 @@
 
 `scripts/fetch_boundaries.py` downloads official council district polygons from the Harris County/COHGIS `CoH_Boundaries` service.
 
-`scripts/fetch_demographics.py` supports 2024 ACS 5-year tract demographic retrieval through the Census API. In this environment, the API returned a key-required response. Set `CENSUS_API_KEY` and rerun the script to generate population and household rates.
+`scripts/fetch_context.py` downloads optional H-GAC major road and major river/bayou linework for visual orientation in the maps.
+
+`scripts/fetch_demographics.py` supports 2024 ACS 5-year tract demographic retrieval through the Census API. In this environment, the API rejected the supplied key. Set a valid `CENSUS_API_KEY` and rerun the script to generate population and household rates.
 
 ## 2. Cleaning and QA/QC
 
@@ -35,6 +37,8 @@ The V3 burden score uses a weighted percentile model:
 - unresolved share: `15%`
 - long-resolution share: `10%`
 - repeat-cluster share: `15%`
+
+These settings are exposed in `config/analysis_config.json`.
 
 Scores are classified as:
 

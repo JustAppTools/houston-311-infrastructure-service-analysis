@@ -2,6 +2,7 @@ import argparse
 import csv
 import json
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode
@@ -42,7 +43,14 @@ def get_json(url: str, params: dict | None = None):
     try:
         return json.loads(text)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(text[:500].strip()) from exc
+        raise RuntimeError(summarize_non_json_response(text)) from exc
+
+
+def summarize_non_json_response(text: str) -> str:
+    title = re.search(r"<title>(.*?)</title>", text, flags=re.IGNORECASE | re.DOTALL)
+    if title:
+        return f"Census API returned non-JSON response: {title.group(1).strip()}"
+    return text[:240].strip()
 
 
 def fetch_acs_for_county(county: str, api_key: str | None) -> pd.DataFrame:

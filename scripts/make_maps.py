@@ -10,6 +10,8 @@ from project_config import CANVAS, DATA_CONTEXT, FIGURES, MAPS, TABLES, ensure_d
 
 CLEAN_FILE = Path(__file__).resolve().parents[1] / "data" / "processed" / "houston_311_infrastructure_requests_cleaned.csv"
 BOUNDARY_FILE = DATA_CONTEXT / "council_district_boundaries.geojson"
+MAJOR_ROADS_FILE = DATA_CONTEXT / "major_roads.geojson"
+MAJOR_RIVERS_FILE = DATA_CONTEXT / "major_rivers.geojson"
 
 
 PALETTE = [
@@ -49,6 +51,12 @@ def load_boundaries() -> dict | None:
     return json.loads(BOUNDARY_FILE.read_text(encoding="utf-8"))
 
 
+def load_geojson(path: Path) -> dict | None:
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def iter_rings(geometry: dict):
     geom_type = geometry.get("type")
     coords = geometry.get("coordinates", [])
@@ -59,6 +67,75 @@ def iter_rings(geometry: dict):
         for polygon in coords:
             for ring in polygon:
                 yield ring
+
+
+def iter_lines(geometry: dict):
+    geom_type = geometry.get("type")
+    coords = geometry.get("coordinates", [])
+    if geom_type == "LineString":
+        yield coords
+    elif geom_type == "MultiLineString":
+        for line in coords:
+            yield line
+
+
+def clip_segment(
+    p1: tuple[float, float],
+    p2: tuple[float, float],
+    box: tuple[int, int, int, int],
+) -> tuple[tuple[float, float], tuple[float, float]] | None:
+    left, top, right, bottom = box
+    x1, y1 = p1
+    x2, y2 = p2
+    dx = x2 - x1
+    dy = y2 - y1
+    p = [-dx, dx, -dy, dy]
+    q = [x1 - left, right - x1, y1 - top, bottom - y1]
+    u1, u2 = 0.0, 1.0
+    for pi, qi in zip(p, q):
+        if pi == 0:
+            if qi < 0:
+                return None
+        else:
+            u = qi / pi
+            if pi < 0:
+                u1 = max(u1, u)
+            else:
+                u2 = min(u2, u)
+    if u1 > u2:
+        return None
+    return ((x1 + u1 * dx, y1 + u1 * dy), (x1 + u2 * dx, y1 + u2 * dy))
+
+
+def draw_context_lines(
+    draw: ImageDraw.ImageDraw,
+    project,
+    clip_box: tuple[int, int, int, int],
+) -> None:
+    layers = [
+        (load_geojson(MAJOR_RIVERS_FILE), (116, 164, 178), 2),
+        (load_geojson(MAJOR_ROADS_FILE), (188, 192, 189), 1),
+    ]
+    for geojson, color, width in layers:
+        if not geojson:
+            continue
+        for feature in geojson.get("features", []):
+            for line in iter_lines(feature.get("geometry", {})):
+                pts = [project(lon, lat) for lon, lat in line]
+                for p1, p2 in zip(pts, pts[1:]):
+                    clipped = clip_segment(p1, p2, clip_box)
+                    if clipped:
+                        draw.line(clipped, fill=color, width=width)
+
+
+def draw_district_labels(draw: ImageDraw.ImageDraw, boundaries: dict, project, size: int = 19) -> None:
+    for feature in boundaries.get("features", []):
+        district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
+        lon, lat = feature_label_point(feature)
+        x, y = project(lon, lat)
+        radius = max(13, size - 4)
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=(255, 255, 255), outline=(75, 82, 82), width=1)
+        draw.text((x - 6, y - size // 2), district, fill=CANVAS["ink"], font=font(size, True))
 
 
 def boundary_extent(boundaries: dict | None, fallback_df: pd.DataFrame) -> tuple[float, float, float, float]:
@@ -198,6 +275,7 @@ def draw_map(df: pd.DataFrame, title: str, path: Path, color: tuple[int, int, in
     extent = boundary_extent(boundaries, geo)
     project = make_projector(extent, (left, top, right, bottom))
     draw_boundary_backdrop(draw, boundaries, project, fill=(235, 238, 235), outline=(198, 203, 201), width=1)
+    draw_context_lines(draw, project, (left, top, right, bottom))
     sample = geo.sample(n=min(len(geo), 12000), random_state=42)
     for _, row in sample.iterrows():
         x, y = project(row["longitude"], row["latitude"])
@@ -247,10 +325,8 @@ def draw_burden_map(df: pd.DataFrame, path: Path) -> None:
             if len(pts) >= 3:
                 draw.polygon(pts, fill=fill, outline=(255, 255, 255))
                 draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
-        lon, lat = feature_label_point(feature)
-        x, y = project(lon, lat)
-        draw.ellipse((x - 15, y - 15, x + 15, y + 15), fill=(255, 255, 255), outline=(75, 82, 82), width=1)
-        draw.text((x - 6, y - 11), district, fill=CANVAS["ink"], font=font(19, True))
+    draw_context_lines(draw, project, (left, top, right - 330, bottom))
+    draw_district_labels(draw, boundaries, project, size=19)
     legend_x = right - 280
     for i, (label, fill) in enumerate(colors.items()):
         y = top + 24 + i * 34
@@ -305,6 +381,7 @@ def draw_repeat_cluster_map(df: pd.DataFrame, path: Path) -> None:
     extent = boundary_extent(boundaries, geo)
     project = make_projector(extent, (left, top, right, bottom))
     draw_boundary_backdrop(draw, boundaries, project, fill=(235, 238, 235), outline=(198, 203, 201), width=1)
+    draw_context_lines(draw, project, (left, top, right, bottom))
     for _, row in clusters.head(350).iterrows():
         x, y = project(row["lon_bin_approx_100m"], row["lat_bin_approx_100m"])
         radius = min(22, 3 + math.sqrt(row["cluster_request_count"]) * 2.5)
@@ -360,10 +437,8 @@ def draw_thematic_choropleth(theme: str, title: str, path: Path) -> None:
             if len(pts) >= 3:
                 draw.polygon(pts, fill=color_for(value), outline=(255, 255, 255))
                 draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
-        lon, lat = feature_label_point(feature)
-        x, y = project(lon, lat)
-        draw.ellipse((x - 13, y - 13, x + 13, y + 13), fill=(255, 255, 255), outline=(75, 82, 82), width=1)
-        draw.text((x - 6, y - 10), district, fill=CANVAS["ink"], font=font(17, True))
+    draw_context_lines(draw, project, (left, top, right - 300, bottom))
+    draw_district_labels(draw, boundaries, project, size=17)
 
     legend_x = right - 265
     draw.text((legend_x, top + 24), "Rate Quartiles", fill=CANVAS["ink"], font=font(21, True))

@@ -23,4 +23,16 @@
 - TIGERweb tract layer: https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Tracts_Blocks/MapServer/7
 - Intended variables: population, households, median household income, poverty count/universe, and no-vehicle household inputs
 
-In this environment, the Census API returned a key-required response. The project records that limitation in `data/processed/context/demographics_metadata.json`. Set `CENSUS_API_KEY` and rerun `scripts/fetch_demographics.py` to enable ACS-normalized outputs.
+In this environment, the Census API rejected the supplied key. The project records that limitation in `data/processed/context/demographics_metadata.json`. Set a valid `CENSUS_API_KEY` and rerun `scripts/fetch_demographics.py` to enable ACS-normalized outputs.
+
+## Map Context Layers
+
+- Source name: H-GAC Major Roads
+- Layer URL: https://gis.h-gac.com/arcgis/rest/services/Open_Data/Transportation/MapServer/9
+- Records downloaded: `113`
+
+- Source name: H-GAC Major Rivers
+- Layer URL: https://gis.h-gac.com/arcgis/rest/services/Open_Data/Environment/MapServer/1
+- Records downloaded: `56`
+
+These layers are used only for visual orientation in the static maps. They are not inputs to the service-burden score.

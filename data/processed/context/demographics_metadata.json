@@ -21,9 +21,9 @@
   "tracts_downloaded": 0,
   "tract_centroids_assigned_to_council_districts": 0,
   "district_rows_written": 0,
-  "used_api_key": false,
-  "access_error": "<html>\n    <head>\n        <title>Missing Key</title>\n    </head>\n    <body>\n        <p>\n            A valid <em>key</em> must be included with each data API request.\n            If you do not have a key, you may sign up for one <a href=\"key_signup.html\">here</a>.\n        </p>\n        <p>\n        \tIf you have questions, please reach out to census.data@census.gov.\n        </p>\n    </body>\n</html>",
+  "used_api_key": true,
+  "access_error": "Census API returned non-JSON response: Invalid Key",
   "access_limitation": "The Census API returned a non-JSON response in this environment. Set CENSUS_API_KEY and rerun scripts/fetch_demographics.py to enable ACS population and household rates.",
-  "downloaded_at_utc": "2026-06-15T00:40:23.678576+00:00",
+  "downloaded_at_utc": "2026-06-15T00:52:02.111174+00:00",
   "method_note": "District demographics are approximated by assigning ACS tract internal points to official council district polygons. This is not areal interpolation."
 }

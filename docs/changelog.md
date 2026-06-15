@@ -4,7 +4,10 @@
 
 - Added point-in-polygon council district assignment for 311 request coordinates.
 - Added optional 2024 ACS 5-year demographic fetch with `CENSUS_API_KEY` support.
-- Added documented ACS access-limitation fallback when the Census API requires a key.
+- Added documented ACS access-limitation fallback when the Census API rejects or requires a key.
+- Added H-GAC major roads and major rivers/bayous as optional visual context layers.
+- Added configurable analysis settings in `config/analysis_config.json`.
+- Added an output index for generated showcase artifacts.
 - Added thematic district burden maps for solid waste, water/sewer/drainage, and roads/signals/sidewalks.
 - Added repeat-location cluster tests and core logic tests.
 - Added `Makefile` task shortcuts.

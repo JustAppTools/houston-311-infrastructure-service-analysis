@@ -1,0 +1,21 @@
+{
+  "downloaded_at_utc": "2026-06-15T00:56:50.593496+00:00",
+  "layers": [
+    {
+      "name": "major_roads",
+      "source_name": "H-GAC Major Roads",
+      "source_url": "https://gis.h-gac.com/arcgis/rest/services/Open_Data/Transportation/MapServer/9",
+      "output_file": "major_roads.geojson",
+      "feature_count": 113,
+      "error": null
+    },
+    {
+      "name": "major_rivers",
+      "source_name": "H-GAC Major Rivers",
+      "source_url": "https://gis.h-gac.com/arcgis/rest/services/Open_Data/Environment/MapServer/1",
+      "output_file": "major_rivers.geojson",
+      "feature_count": 56,
+      "error": null
+    }
+  ]
+}

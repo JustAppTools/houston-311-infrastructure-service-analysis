@@ -37,6 +37,7 @@ def main() -> None:
         )
     if not args.skip_context:
         run("fetch_boundaries.py")
+        run("fetch_context.py")
         run("fetch_demographics.py")
     run("clean_311_requests.py")
     run("analyze_requests.py")
