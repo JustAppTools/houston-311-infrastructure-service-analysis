@@ -85,6 +85,18 @@ def rate_per_10k(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
     return np.where(denominator.fillna(0) > 0, numerator / denominator * 10000, np.nan)
 
 
+def json_safe(value):
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [json_safe(item) for item in value]
+    if pd.isna(value):
+        return None
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
 def main() -> None:
     ensure_directories()
     if not CLEAN_FILE.exists():
@@ -167,6 +179,35 @@ def main() -> None:
         .sort_values(["month", "request_count"], ascending=[True, False])
     )
     monthly.to_csv(TABLES / "monthly_request_volume.csv", index=False)
+
+    quality = (
+        df.groupby("council_district", dropna=False)
+        .agg(
+            request_count=("case_number", "count"),
+            records_with_coordinates=("latitude", "count"),
+            spatially_assigned_records=("spatial_council_district", "count"),
+        )
+        .reset_index()
+    )
+    quality = quality[quality["council_district"].astype(str).str.match(r"^[A-K]$")].copy()
+    quality["coordinate_completeness"] = quality["records_with_coordinates"] / quality["request_count"]
+    quality["spatial_assignment_share"] = quality["spatially_assigned_records"] / quality["request_count"]
+    if {"source_council_district", "spatial_council_district"}.issubset(df.columns):
+        comparable = df.dropna(subset=["source_council_district", "spatial_council_district"]).copy()
+        comparable["source_council_district"] = comparable["source_council_district"].astype(str).str.strip()
+        comparable["spatial_council_district"] = comparable["spatial_council_district"].astype(str).str.strip()
+        comparable["source_spatial_match"] = (
+            comparable["source_council_district"] == comparable["spatial_council_district"]
+        )
+        agreement = (
+            comparable.groupby("council_district")["source_spatial_match"]
+            .mean()
+            .reset_index(name="source_spatial_district_agreement")
+        )
+        quality = quality.merge(agreement, on="council_district", how="left")
+    else:
+        quality["source_spatial_district_agreement"] = np.nan
+    quality.sort_values("council_district").to_csv(TABLES / "district_data_quality.csv", index=False)
 
     area = (
         df[df["council_district"].notna() & (df["council_district"].astype(str).str.strip() != "")]
@@ -305,9 +346,10 @@ def main() -> None:
             "district_burden_drivers.csv",
             "repeat_location_clusters.csv",
             "thematic_district_burden.csv",
+            "district_data_quality.csv",
         ],
     }
-    SUMMARY_FILE.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    SUMMARY_FILE.write_text(json.dumps(json_safe(summary), indent=2), encoding="utf-8")
     print(f"Wrote summary tables and {SUMMARY_FILE.name}.")
 
 

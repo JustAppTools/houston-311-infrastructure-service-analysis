@@ -3,6 +3,7 @@
 ## Main Showcase Visual
 
 - `outputs/maps/council_district_service_burden_choropleth.png` - the primary portfolio visual. It ranks council districts by the V3 service-burden score and includes top driver notes.
+- `index.html` - interactive static showcase that uses the main map, supporting maps, and district tables.
 
 ## Supporting Maps
 
@@ -28,4 +29,5 @@
 - `outputs/tables/district_burden_drivers.csv` - top district driver summary.
 - `outputs/tables/repeat_location_clusters.csv` - detected repeat-location clusters.
 - `outputs/tables/thematic_district_burden.csv` - district metrics for thematic maps.
+- `outputs/tables/district_data_quality.csv` - district-level coordinate and spatial-assignment quality checks.
 - Other table outputs summarize categories, resolution, unresolved share, long-resolution share, and monthly volume.

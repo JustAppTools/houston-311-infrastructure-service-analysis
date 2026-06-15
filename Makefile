@@ -1,4 +1,4 @@
-.PHONY: all fetch clean analyze maps test
+.PHONY: all fetch clean analyze maps test compile pages-ready
 
 PYTHON ?= python
 
@@ -8,6 +8,7 @@ all:
 fetch:
 	$(PYTHON) scripts/fetch_data.py
 	$(PYTHON) scripts/fetch_boundaries.py
+	$(PYTHON) scripts/fetch_context.py
 	$(PYTHON) scripts/fetch_demographics.py
 
 clean:
@@ -21,3 +22,8 @@ maps:
 
 test:
 	$(PYTHON) -m unittest discover -s tests
+
+compile:
+	$(PYTHON) -m compileall scripts tests
+
+pages-ready: test compile

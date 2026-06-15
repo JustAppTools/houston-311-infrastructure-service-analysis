@@ -1,5 +1,16 @@
 # Changelog
 
+## V3.1
+
+- Added a root `index.html` interactive static showcase for GitHub Pages.
+- Added GitHub Actions CI for unit tests and Python compile checks.
+- Added a GitHub Pages deployment workflow.
+- Added `outputs/tables/district_data_quality.csv` with coordinate and spatial-assignment quality metrics.
+- Added strict JSON-safe analysis summary output.
+- Added pinned dependency versions in `requirements.txt`.
+- Added project brief, presentation outline, and future-work documents.
+- Updated README and output index for the interactive/public showcase.
+
 ## V3
 
 - Added point-in-polygon council district assignment for 311 request coordinates.

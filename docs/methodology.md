@@ -50,3 +50,9 @@ Scores are classified as:
 ## 5. Outputs
 
 The pipeline produces cleaned CSV/GeoJSON data, summary tables, category charts, point maps, repeat-cluster maps, thematic request-rate maps, and the main council-district burden choropleth.
+
+The V3.1 public showcase adds a static `index.html` page that reads generated CSV tables and displays district metrics alongside the map outputs. The page is designed for GitHub Pages and does not require a backend.
+
+## 6. Data Quality Outputs
+
+`outputs/tables/district_data_quality.csv` summarizes coordinate completeness, spatial assignment share, and source-vs-spatial council district agreement by district. These metrics are audit aids and are not part of the service-burden score.

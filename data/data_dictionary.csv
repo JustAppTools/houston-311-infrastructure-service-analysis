@@ -32,3 +32,6 @@ ACS/TIGER,estimated_households,Estimated district households,Optional ACS tract 
 ACS/TIGER,requests_per_10k_residents,Resident-normalized request rate,request_count divided by estimated_population times 10000,Falls back out of score when ACS data unavailable
 ACS/TIGER,requests_per_10k_households,Household-normalized request rate,request_count divided by estimated_households times 10000,Falls back out of score when ACS data unavailable
 Derived,quality_flags,Record-level QA/QC flags,Pipe-delimited flags for missing dates coordinates low-confidence category or out-of-range coordinates,ok means no basic QA flag was triggered
+Derived,coordinate_completeness,District-level coordinate completeness,records_with_coordinates divided by request_count in outputs/tables/district_data_quality.csv,Audit metric not used in score
+Derived,spatial_assignment_share,District-level spatial assignment share,spatially_assigned_records divided by request_count in outputs/tables/district_data_quality.csv,Audit metric not used in score
+Derived,source_spatial_district_agreement,District source-vs-spatial agreement,share of comparable records where source_council_district equals spatial_council_district,Audit metric not used in score

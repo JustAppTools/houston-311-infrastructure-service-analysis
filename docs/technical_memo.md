@@ -1,5 +1,9 @@
 # Technical Memo: Houston 311 Infrastructure Service Request Analysis
 
+## V3.1 Showcase Update
+
+The repository now includes a root `index.html` static showcase, GitHub Actions CI, a GitHub Pages deployment workflow, pinned dependencies, and a district-level data-quality table. These additions improve presentation, repeatability, and repository maintainability without changing the core V3 burden-score method.
+
 ## Purpose
 
 This V3 analysis identifies Houston infrastructure-service burden using public 311 request records, official council district polygons, spatial district assignment, repeat-location screening, and static GIS outputs.
@@ -10,7 +14,7 @@ The V3 extract covers records opened from `2025-04-01` through `2025-06-30`. The
 
 Official council district polygons come from the Harris County/COHGIS `CoH_Boundaries` service.
 
-The pipeline also supports 2024 ACS 5-year demographic normalization. In this environment, the Census API returned a key-required response, so ACS rates were not committed. The score falls back to requests per square mile where population and household rates are unavailable.
+The pipeline also supports 2024 ACS 5-year demographic normalization. In this environment, the Census API rejected the supplied key, so ACS rates were not committed. The score falls back to requests per square mile where population and household rates are unavailable.
 
 ## Methods
 

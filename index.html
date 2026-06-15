@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Houston 311 Infrastructure Service Burden</title>
+  <style>
+    :root {
+      --bg: #f7f8f5;
+      --panel: #ffffff;
+      --ink: #23282d;
+      --muted: #5f6970;
+      --line: #cbd1ce;
+      --road: #3f4748;
+      --water: #2f8296;
+      --gold: #d9ae49;
+      --clay: #d1764e;
+      --berry: #9b2f4f;
+      --green: #7ca56a;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 248, 245, 0.96);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    nav a, button {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 8px 11px;
+      font: inherit;
+      font-size: 14px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    button[aria-pressed="true"] {
+      background: var(--road);
+      color: #fff;
+      border-color: var(--road);
+    }
+    main {
+      width: min(1320px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 22px 0 48px;
+    }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+    }
+    .visual-panel, .side-panel, .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .visual-panel {
+      overflow: hidden;
+    }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfbf8;
+    }
+    .map-frame {
+      padding: 10px;
+      background: #eef1ed;
+    }
+    .map-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid #b8bfbc;
+      background: #fff;
+    }
+    .side-panel {
+      padding: 18px;
+      min-height: 360px;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+    .metric {
+      border-left: 4px solid var(--water);
+      padding: 8px 10px;
+      background: #f6f8f8;
+      min-height: 66px;
+    }
+    .metric strong {
+      display: block;
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+    h3 {
+      margin: 0 0 8px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+    p {
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    .section {
+      margin-top: 18px;
+      padding: 18px;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+      background: #fff;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e4e8e5;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    th {
+      background: #f2f4f1;
+      color: #384044;
+      position: sticky;
+      top: 0;
+    }
+    tbody tr {
+      cursor: pointer;
+    }
+    tbody tr:hover, tbody tr.selected {
+      background: #f7efe8;
+    }
+    .class-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 13px;
+      min-width: 78px;
+      text-align: center;
+    }
+    .Low { background: var(--green); }
+    .Medium { background: var(--gold); color: #1d2326; }
+    .High { background: var(--clay); }
+    .VeryHigh { background: var(--berry); }
+    .split {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .finding-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 20px 28px 32px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    @media (max-width: 980px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      nav {
+        justify-content: flex-start;
+      }
+      .workspace, .split {
+        grid-template-columns: 1fr;
+      }
+      .side-panel {
+        min-height: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>Houston 311 Infrastructure Service Burden</h1>
+      <p>April-June 2025 council-district screening analysis</p>
+    </div>
+    <nav aria-label="Project links">
+      <a href="README.md">README</a>
+      <a href="docs/methodology.md">Methodology</a>
+      <a href="docs/limitations.md">Limitations</a>
+      <a href="outputs/index.md">Outputs</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="workspace" aria-label="Interactive analysis workspace">
+      <div class="visual-panel">
+        <div class="toolbar" role="group" aria-label="Map selection">
+          <button type="button" data-map="burden" aria-pressed="true">Burden</button>
+          <button type="button" data-map="repeat" aria-pressed="false">Repeat Clusters</button>
+          <button type="button" data-map="solid" aria-pressed="false">Solid Waste</button>
+          <button type="button" data-map="water" aria-pressed="false">Water / Drainage</button>
+          <button type="button" data-map="roads" aria-pressed="false">Roads / Signals</button>
+        </div>
+        <div class="map-frame">
+          <img id="main-map" src="outputs/maps/council_district_service_burden_choropleth.png" alt="Houston 311 infrastructure burden by council district">
+        </div>
+      </div>
+
+      <aside class="side-panel" aria-live="polite">
+        <h2 id="district-title">District C</h2>
+        <p id="district-summary">Highest current V3 burden score in the April-June 2025 extract.</p>
+        <div class="metric-grid">
+          <div class="metric"><strong id="score-value">80.5</strong><span>Burden score</span></div>
+          <div class="metric"><strong id="class-value">Very High</strong><span>Burden class</span></div>
+          <div class="metric"><strong id="requests-value">11,945</strong><span>Requests</span></div>
+          <div class="metric"><strong id="open-value">16.0%</strong><span>Unresolved share</span></div>
+          <div class="metric"><strong id="repeat-value">48.4%</strong><span>Repeat-cluster share</span></div>
+          <div class="metric"><strong id="density-value">339/sq mi</strong><span>Rate fallback</span></div>
+        </div>
+        <h3>Top category</h3>
+        <p id="category-value">Solid Waste / Recycling</p>
+      </aside>
+    </section>
+
+    <section class="section">
+      <h2>District Ranking</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>District</th>
+              <th>Class</th>
+              <th>Score</th>
+              <th>Requests</th>
+              <th>Open</th>
+              <th>Long</th>
+              <th>Repeat</th>
+              <th>Rate</th>
+              <th>Top Category</th>
+            </tr>
+          </thead>
+          <tbody id="district-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section split">
+      <div>
+        <h2>Key Findings</h2>
+        <ul class="finding-list">
+          <li>82,743 infrastructure-related 311 records were cleaned and analyzed.</li>
+          <li>Solid Waste / Recycling is the largest standardized request category.</li>
+          <li>Districts C and H rank Very High under the current V3 score.</li>
+          <li>Repeat-location screening found 7,945 approximate coordinate/category clusters.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>Interpretation</h2>
+        <p>The score is an analytical index, not an official City performance metric. ACS normalization is supported, but the supplied Census key was rejected; the committed output therefore uses requests per square mile as the documented rate fallback.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Sources: City of Houston 311 Archive, COHGIS council districts, H-GAC map context layers, and 2024 ACS when a valid Census API key is available.
+  </footer>
+
+  <script>
+    const maps = {
+      burden: ["outputs/maps/council_district_service_burden_choropleth.png", "Houston 311 infrastructure burden by council district"],
+      repeat: ["outputs/maps/repeat_location_clusters.png", "Repeat-location infrastructure clusters"],
+      solid: ["outputs/maps/solid_waste_recycling_burden.png", "Solid waste and recycling request rate"],
+      water: ["outputs/maps/water_sewer_drainage_burden.png", "Water sewer and drainage request rate"],
+      roads: ["outputs/maps/roads_signals_sidewalks_burden.png", "Road signal and sidewalk request rate"]
+    };
+
+    let districtData = [];
+    let driverData = new Map();
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let quoted = false;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (char === '"' && quoted && next === '"') {
+          cell += '"';
+          i++;
+        } else if (char === '"') {
+          quoted = !quoted;
+        } else if (char === "," && !quoted) {
+          row.push(cell);
+          cell = "";
+        } else if ((char === "\n" || char === "\r") && !quoted) {
+          if (char === "\r" && next === "\n") i++;
+          row.push(cell);
+          if (row.some(value => value !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+      if (cell || row.length) {
+        row.push(cell);
+        rows.push(row);
+      }
+      const headers = rows.shift();
+      return rows.map(values => Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])));
+    }
+
+    function formatNumber(value, digits = 0) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "n/a";
+      return number.toLocaleString(undefined, { maximumFractionDigits: digits, minimumFractionDigits: digits });
+    }
+
+    function formatPct(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "n/a";
+      return `${(number * 100).toFixed(1)}%`;
+    }
+
+    function classKey(value) {
+      return String(value).replace(/\s+/g, "");
+    }
+
+    function renderRows() {
+      const tbody = document.getElementById("district-rows");
+      tbody.innerHTML = "";
+      districtData.forEach((row, index) => {
+        const driver = driverData.get(row.council_district) || {};
+        const tr = document.createElement("tr");
+        tr.tabIndex = 0;
+        tr.dataset.district = row.council_district;
+        tr.innerHTML = `
+          <td>${row.council_district}</td>
+          <td><span class="class-badge ${classKey(row.service_burden_class)}">${row.service_burden_class}</span></td>
+          <td>${formatNumber(row.service_burden_score, 1)}</td>
+          <td>${formatNumber(row.request_count)}</td>
+          <td>${formatPct(row.unresolved_share)}</td>
+          <td>${formatPct(row.long_resolution_share)}</td>
+          <td>${formatPct(row.repeat_cluster_share)}</td>
+          <td>${formatNumber(row.requests_per_sq_mile)}/sq mi</td>
+          <td>${driver.top_category || "n/a"}</td>
+        `;
+        tr.addEventListener("click", () => selectDistrict(row.council_district));
+        tr.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") selectDistrict(row.council_district);
+        });
+        tbody.appendChild(tr);
+        if (index === 0) tr.classList.add("selected");
+      });
+    }
+
+    function selectDistrict(district) {
+      const row = districtData.find(item => item.council_district === district);
+      if (!row) return;
+      const driver = driverData.get(district) || {};
+      document.querySelectorAll("tbody tr").forEach(tr => tr.classList.toggle("selected", tr.dataset.district === district));
+      document.getElementById("district-title").textContent = `District ${district}`;
+      document.getElementById("district-summary").textContent = `${row.service_burden_class} burden class across ${formatNumber(row.request_count)} infrastructure requests.`;
+      document.getElementById("score-value").textContent = formatNumber(row.service_burden_score, 1);
+      document.getElementById("class-value").textContent = row.service_burden_class;
+      document.getElementById("requests-value").textContent = formatNumber(row.request_count);
+      document.getElementById("open-value").textContent = formatPct(row.unresolved_share);
+      document.getElementById("repeat-value").textContent = formatPct(row.repeat_cluster_share);
+      document.getElementById("density-value").textContent = `${formatNumber(row.requests_per_sq_mile)}/sq mi`;
+      document.getElementById("category-value").textContent = driver.top_category || "n/a";
+    }
+
+    document.querySelectorAll("[data-map]").forEach(button => {
+      button.addEventListener("click", () => {
+        const key = button.dataset.map;
+        const [src, alt] = maps[key];
+        document.getElementById("main-map").src = src;
+        document.getElementById("main-map").alt = alt;
+        document.querySelectorAll("[data-map]").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+      });
+    });
+
+    Promise.all([
+      fetch("outputs/tables/council_district_service_burden.csv").then(response => response.text()),
+      fetch("outputs/tables/district_burden_drivers.csv").then(response => response.text())
+    ]).then(([districtCsv, driverCsv]) => {
+      districtData = parseCsv(districtCsv);
+      driverData = new Map(parseCsv(driverCsv).map(row => [row.council_district, row]));
+      renderRows();
+      if (districtData.length) selectDistrict(districtData[0].council_district);
+    }).catch(error => {
+      document.getElementById("district-summary").textContent = `Unable to load table data: ${error.message}`;
+    });
+  </script>
+</body>
+</html>

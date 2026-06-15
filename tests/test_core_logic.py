@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from clean_311_requests import classify_category, is_open_status
-from analyze_requests import burden_class, percentile_rank, rate_per_10k
+from analyze_requests import burden_class, json_safe, percentile_rank, rate_per_10k
 from project_config import SCORE_WEIGHTS
 from spatial_utils import point_in_geometry
 
@@ -43,6 +43,10 @@ class CoreLogicTests(unittest.TestCase):
     def test_percentile_rank_zeroes_flat_series(self):
         ranked = percentile_rank(pd.Series([3, 3, 3]))
         self.assertEqual(ranked.tolist(), [0, 0, 0])
+
+    def test_json_safe_replaces_nan(self):
+        cleaned = json_safe({"value": np.nan, "items": [np.float64(2.5), np.nan]})
+        self.assertEqual(cleaned, {"value": None, "items": [2.5, None]})
 
     def test_point_in_polygon(self):
         square = {

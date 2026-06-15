@@ -8,7 +8,7 @@ The repository's primary showcase artifact is the council-district service-burde
 
 ## Project Overview
 
-This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a technical analysis package rather than a dashboard: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, and public-sector documentation.
+This V3 portfolio project analyzes real City of Houston 311 service request records from the public ArcGIS archive. It is a technical analysis package with a static interactive showcase: reproducible scripts, official council-district boundaries, point-in-polygon district assignment, optional ACS demographic normalization, QA/QC flags, summary tables, static charts, static maps, repeat-location screening, GitHub Pages-ready HTML, and public-sector documentation.
 
 **Research question:** Which Houston areas show the highest infrastructure-service burden based on request volume, issue type, resolution time, unresolved cases, long-resolution cases, and recurring request clusters?
 
@@ -50,6 +50,10 @@ These are analytical findings from a bounded public-data extract, not official C
 ### Main Map
 
 ![Council district service burden choropleth](outputs/maps/council_district_service_burden_choropleth.png)
+
+### Interactive Showcase
+
+Open [`index.html`](index.html) locally through a small static server, or use the GitHub Pages workflow included in `.github/workflows/pages.yml`.
 
 ### Supporting Visuals
 
@@ -102,6 +106,13 @@ Run tests:
 python -m unittest discover -s tests
 ```
 
+Run the same checks used by CI:
+
+```bash
+python -m unittest discover -s tests
+python -m compileall scripts tests
+```
+
 ## Configurable Analysis Settings
 
 The main analysis settings live in `config/analysis_config.json`: date range, max records, long-resolution threshold, repeat-cluster threshold, and service-burden score weights.
@@ -123,6 +134,8 @@ The same settings are read by the scripts, so scoring changes can be made in one
 .
 |-- README.md
 |-- Makefile
+|-- index.html
+|-- .github/
 |-- config/
 |   `-- analysis_config.json
 |-- data/
@@ -137,6 +150,9 @@ The same settings are read by the scripts, so scoring changes can be made in one
 |   |-- data_sources.md
 |   |-- limitations.md
 |   |-- changelog.md
+|   |-- project_brief.md
+|   |-- presentation_outline.md
+|   |-- future_work.md
 |   `-- portfolio_page.html
 |-- outputs/
 |   |-- maps/
@@ -160,6 +176,8 @@ The same settings are read by the scripts, so scoring changes can be made in one
 - Repeat-location cluster screening
 - Official council-district choropleth mapping
 - Static chart and map production
+- Static interactive showcase design
+- GitHub Actions CI and Pages deployment
 - Public-sector technical writing and limitations documentation
 
 ## Limitations

@@ -25,3 +25,7 @@ Repeat-location clusters use rounded coordinates and category matching. They ide
 Findings are not official City of Houston metrics and should not be used for emergency response or operational dispatch decisions.
 
 H-GAC roads and rivers are map context only. They do not affect district scores.
+
+## Publication
+
+The interactive showcase is a static GitHub Pages artifact. It reads committed CSV outputs and images; it is not a live dashboard and does not automatically refresh unless the pipeline is rerun and outputs are recommitted.
