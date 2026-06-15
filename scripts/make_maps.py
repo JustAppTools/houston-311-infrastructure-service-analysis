@@ -1,13 +1,15 @@
+import json
 import math
 from pathlib import Path
 
 import pandas as pd
 from PIL import Image, ImageDraw, ImageFont
 
-from project_config import CANVAS, FIGURES, MAPS, TABLES, ensure_directories
+from project_config import CANVAS, DATA_CONTEXT, FIGURES, MAPS, TABLES, ensure_directories
 
 
 CLEAN_FILE = Path(__file__).resolve().parents[1] / "data" / "processed" / "houston_311_infrastructure_requests_cleaned.csv"
+BOUNDARY_FILE = DATA_CONTEXT / "council_district_boundaries.geojson"
 
 
 PALETTE = [
@@ -41,9 +43,86 @@ def canvas(title: str, subtitle: str = "") -> tuple[Image.Image, ImageDraw.Image
     return img, draw
 
 
+def load_boundaries() -> dict | None:
+    if not BOUNDARY_FILE.exists():
+        return None
+    return json.loads(BOUNDARY_FILE.read_text(encoding="utf-8"))
+
+
+def iter_rings(geometry: dict):
+    geom_type = geometry.get("type")
+    coords = geometry.get("coordinates", [])
+    if geom_type == "Polygon":
+        for ring in coords:
+            yield ring
+    elif geom_type == "MultiPolygon":
+        for polygon in coords:
+            for ring in polygon:
+                yield ring
+
+
+def boundary_extent(boundaries: dict | None, fallback_df: pd.DataFrame) -> tuple[float, float, float, float]:
+    xs, ys = [], []
+    if boundaries:
+        for feature in boundaries.get("features", []):
+            for ring in iter_rings(feature.get("geometry", {})):
+                for lon, lat in ring:
+                    xs.append(lon)
+                    ys.append(lat)
+    if not xs:
+        geo = valid_geo(fallback_df)
+        xs = geo["longitude"].tolist()
+        ys = geo["latitude"].tolist()
+    lon_min, lon_max = min(xs), max(xs)
+    lat_min, lat_max = min(ys), max(ys)
+    lon_pad = max((lon_max - lon_min) * 0.05, 0.02)
+    lat_pad = max((lat_max - lat_min) * 0.05, 0.02)
+    return lon_min - lon_pad, lon_max + lon_pad, lat_min - lat_pad, lat_max + lat_pad
+
+
+def make_projector(extent: tuple[float, float, float, float], box: tuple[int, int, int, int]):
+    lon_min, lon_max, lat_min, lat_max = extent
+    left, top, right, bottom = box
+
+    def project(lon: float, lat: float) -> tuple[float, float]:
+        x = left + (lon - lon_min) / (lon_max - lon_min) * (right - left)
+        y = bottom - (lat - lat_min) / (lat_max - lat_min) * (bottom - top)
+        return x, y
+
+    return project
+
+
+def draw_boundary_backdrop(
+    draw: ImageDraw.ImageDraw,
+    boundaries: dict | None,
+    project,
+    fill: tuple[int, int, int] | None = None,
+    outline: tuple[int, int, int] = (172, 178, 178),
+    width: int = 2,
+) -> None:
+    if not boundaries:
+        return
+    for feature in boundaries.get("features", []):
+        for i, ring in enumerate(iter_rings(feature.get("geometry", {}))):
+            pts = [project(lon, lat) for lon, lat in ring]
+            if len(pts) >= 3:
+                draw.polygon(pts, fill=fill if i == 0 else None, outline=outline)
+                if width > 1:
+                    draw.line(pts + [pts[0]], fill=outline, width=width)
+
+
+def feature_label_point(feature: dict) -> tuple[float, float]:
+    xs, ys = [], []
+    for ring in iter_rings(feature.get("geometry", {})):
+        for lon, lat in ring:
+            xs.append(lon)
+            ys.append(lat)
+    return (sum(xs) / len(xs), sum(ys) / len(ys)) if xs else (0, 0)
+
+
 def save_bar_chart(data: pd.DataFrame, label_col: str, value_col: str, title: str, path: Path, suffix: str = "") -> None:
     data = data.head(10).iloc[::-1]
-    img, draw = canvas(title, "City of Houston 311 archive extract; V1 infrastructure categories")
+    img, draw = canvas(title, "City of Houston 311 archive extract; V2 infrastructure categories")
     left, top, right, bottom = 410, 145, CANVAS["width"] - 120, CANVAS["height"] - 90
     max_value = max(float(data[value_col].max()), 1)
     bar_h = max(28, (bottom - top) // max(len(data), 1) - 12)
@@ -69,27 +148,34 @@ def save_share_chart(data: pd.DataFrame, title: str, path: Path) -> None:
 
 def save_month_chart(df: pd.DataFrame, path: Path) -> None:
     monthly = df.groupby("month").size().reset_index(name="request_count").sort_values("month")
-    img, draw = canvas("Monthly Request Volume", "Shown when the extract spans more than one month")
+    img, draw = canvas("Monthly Request Volume", "Infrastructure-related Houston 311 requests in the V2 extract")
     left, top, right, bottom = 140, 170, CANVAS["width"] - 110, CANVAS["height"] - 120
     if len(monthly) < 2:
-        draw.text((left, top), "The default V1 extract covers one month, so a trend line is not interpreted.", fill=CANVAS["ink"], font=font(24, True))
+        draw.text((left, top), "The extract covers one month, so a trend line is not interpreted.", fill=CANVAS["ink"], font=font(24, True))
         draw.text((left, top + 48), f"{monthly.iloc[0]['month']}: {int(monthly.iloc[0]['request_count']):,} infrastructure records", fill=CANVAS["muted"], font=font(23))
         img.save(path)
         return
     max_y = max(monthly["request_count"].max(), 1)
+    min_y = min(monthly["request_count"].min(), 0)
     points = []
     for i, row in monthly.reset_index(drop=True).iterrows():
         x = left + i * (right - left) / (len(monthly) - 1)
-        y = bottom - row["request_count"] * (bottom - top) / max_y
+        y = bottom - (row["request_count"] - min_y) * (bottom - top) / (max_y - min_y)
         points.append((x, y))
     for grid_i in range(5):
         y = top + grid_i * (bottom - top) / 4
+        value = max_y - grid_i * (max_y - min_y) / 4
         draw.line((left, y, right, y), fill=CANVAS["grid"], width=1)
+        draw.text((left - 92, y - 10), f"{value:,.0f}", fill=CANVAS["muted"], font=font(16))
+    draw.line((left, top, left, bottom), fill=CANVAS["grid"], width=2)
+    draw.line((left, bottom, right, bottom), fill=CANVAS["grid"], width=2)
     draw.line(points, fill=CANVAS["accent"], width=5)
     for x, y in points:
         draw.ellipse((x - 7, y - 7, x + 7, y + 7), fill=CANVAS["accent2"])
     for i, row in monthly.reset_index(drop=True).iterrows():
-        x = points[i][0]
+        x, y = points[i]
+        value = int(row["request_count"])
+        draw.text((x - 35, y - 36), f"{value:,}", fill=CANVAS["ink"], font=font(18, True))
         draw.text((x - 35, bottom + 18), str(row["month"]), fill=CANVAS["ink"], font=font(17))
     img.save(path)
 
@@ -104,20 +190,17 @@ def draw_map(df: pd.DataFrame, title: str, path: Path, color: tuple[int, int, in
     img, draw = canvas(title, "Point positions from City of Houston 311 latitude/longitude fields")
     left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
     draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
+    boundaries = load_boundaries()
     if geo.empty:
         draw.text((left + 40, top + 40), "No valid coordinates in this extract.", fill=CANVAS["ink"], font=font(24, True))
         img.save(path)
         return
-    lon_min, lon_max = geo["longitude"].quantile([0.01, 0.99])
-    lat_min, lat_max = geo["latitude"].quantile([0.01, 0.99])
-    lon_pad = max((lon_max - lon_min) * 0.08, 0.02)
-    lat_pad = max((lat_max - lat_min) * 0.08, 0.02)
-    lon_min, lon_max = lon_min - lon_pad, lon_max + lon_pad
-    lat_min, lat_max = lat_min - lat_pad, lat_max + lat_pad
+    extent = boundary_extent(boundaries, geo)
+    project = make_projector(extent, (left, top, right, bottom))
+    draw_boundary_backdrop(draw, boundaries, project, fill=(235, 238, 235), outline=(198, 203, 201), width=1)
     sample = geo.sample(n=min(len(geo), 12000), random_state=42)
     for _, row in sample.iterrows():
-        x = left + (row["longitude"] - lon_min) / (lon_max - lon_min) * (right - left)
-        y = bottom - (row["latitude"] - lat_min) / (lat_max - lat_min) * (bottom - top)
+        x, y = project(row["longitude"], row["latitude"])
         if left <= x <= right and top <= y <= bottom:
             draw.ellipse((x - 2, y - 2, x + 2, y + 2), fill=color)
     draw.text((left, bottom + 22), f"{len(geo):,} valid coordinate records; random sample drawn when over 12,000 points.", fill=CANVAS["muted"], font=font(18))
@@ -126,36 +209,79 @@ def draw_map(df: pd.DataFrame, title: str, path: Path, color: tuple[int, int, in
 
 def draw_burden_map(df: pd.DataFrame, path: Path) -> None:
     area_path = TABLES / "council_district_service_burden.csv"
-    img, draw = canvas("Council District Service-Burden Screen", "Symbols are district centroids from request coordinates, not official boundaries")
+    driver_path = TABLES / "district_burden_drivers.csv"
+    img, draw = canvas("Houston 311 Infrastructure Burden by Council District", "Official council district polygons; score combines density, resolution, unresolved, long-resolution, and repeat-cluster metrics")
     left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
     draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
     geo = valid_geo(df)
-    if geo.empty or not area_path.exists():
-        draw.text((left + 40, top + 40), "No valid coordinate or council-district data in this extract.", fill=CANVAS["ink"], font=font(24, True))
+    boundaries = load_boundaries()
+    if geo.empty or not area_path.exists() or not boundaries:
+        draw.text((left + 40, top + 40), "No valid coordinate, boundary, or council-district data in this extract.", fill=CANVAS["ink"], font=font(24, True))
         img.save(path)
         return
     area = pd.read_csv(area_path)
-    centers = geo.groupby("council_district").agg(latitude=("latitude", "median"), longitude=("longitude", "median")).reset_index()
-    plot = centers.merge(area, on="council_district", how="inner")
-    lon_min, lon_max = geo["longitude"].quantile([0.01, 0.99])
-    lat_min, lat_max = geo["latitude"].quantile([0.01, 0.99])
-    lon_pad = max((lon_max - lon_min) * 0.08, 0.02)
-    lat_pad = max((lat_max - lat_min) * 0.08, 0.02)
-    lon_min, lon_max = lon_min - lon_pad, lon_max + lon_pad
-    lat_min, lat_max = lat_min - lat_pad, lat_max + lat_pad
-    colors = {"Low": (116, 152, 96), "Medium": (207, 169, 82), "High": (204, 112, 77), "Very High": (159, 67, 85)}
-    for _, row in plot.iterrows():
-        x = left + (row["longitude"] - lon_min) / (lon_max - lon_min) * (right - left)
-        y = bottom - (row["latitude"] - lat_min) / (lat_max - lat_min) * (bottom - top)
-        radius = 12 + math.sqrt(max(row["request_count"], 1)) * 0.25
-        fill = colors.get(row["service_burden_class"], (120, 120, 120))
-        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=fill, outline=(255, 255, 255), width=2)
-        draw.text((x - 6, y - 10), str(row["council_district"]), fill=(255, 255, 255), font=font(18, True))
-    legend_x = right - 270
+    area_by_district = {str(row["council_district"]): row for _, row in area.iterrows()}
+    extent = boundary_extent(boundaries, geo)
+    project = make_projector(extent, (left, top, right - 330, bottom))
+    colors = {"Low": (137, 171, 112), "Medium": (220, 185, 101), "High": (210, 121, 84), "Very High": (160, 69, 88)}
+    for feature in boundaries.get("features", []):
+        district = str(feature.get("properties", {}).get("DISTRICT", "")).strip()
+        row = area_by_district.get(district)
+        fill = colors.get(row["service_burden_class"] if row is not None else "", (224, 226, 222))
+        for ring in iter_rings(feature.get("geometry", {})):
+            pts = [project(lon, lat) for lon, lat in ring]
+            if len(pts) >= 3:
+                draw.polygon(pts, fill=fill, outline=(255, 255, 255))
+                draw.line(pts + [pts[0]], fill=(75, 82, 82), width=2)
+        lon, lat = feature_label_point(feature)
+        x, y = project(lon, lat)
+        draw.ellipse((x - 15, y - 15, x + 15, y + 15), fill=(255, 255, 255), outline=(75, 82, 82), width=1)
+        draw.text((x - 6, y - 11), district, fill=CANVAS["ink"], font=font(19, True))
+    legend_x = right - 280
     for i, (label, fill) in enumerate(colors.items()):
         y = top + 24 + i * 34
         draw.rectangle((legend_x, y, legend_x + 22, y + 22), fill=fill)
         draw.text((legend_x + 34, y - 1), label, fill=CANVAS["ink"], font=font(18))
+    draw.text((legend_x, top + 180), "Top Drivers", fill=CANVAS["ink"], font=font(22, True))
+    if driver_path.exists():
+        drivers = pd.read_csv(driver_path).head(5)
+        y = top + 214
+        for _, row in drivers.iterrows():
+            district = row["council_district"]
+            score = row["service_burden_score"]
+            density = area_by_district[str(district)]["requests_per_sq_mile"]
+            top_cat = str(row["top_category"]).replace(" / ", "/")
+            line1 = f"{district}: {score:.1f} score"
+            line2 = f"{density:,.0f}/sq mi; {top_cat[:22]}"
+            draw.text((legend_x, y), line1, fill=CANVAS["ink"], font=font(18, True))
+            draw.text((legend_x, y + 24), line2, fill=CANVAS["muted"], font=font(15))
+            y += 62
+    draw.polygon([(left + 20, bottom - 80), (left + 20, bottom - 28), (left + 35, bottom - 58)], fill=CANVAS["ink"])
+    draw.text((left + 42, bottom - 68), "N", fill=CANVAS["ink"], font=font(19, True))
+    draw.text((left, bottom + 22), "Boundary source: COHGIS/Harris County CoH_Boundaries service. Not population-normalized.", fill=CANVAS["muted"], font=font(16))
+    img.save(path)
+
+
+def draw_repeat_cluster_map(df: pd.DataFrame, path: Path) -> None:
+    clusters_path = TABLES / "repeat_location_clusters.csv"
+    img, draw = canvas("Repeat-Location Infrastructure Clusters", "Approximate 100-meter coordinate bins with 3+ same-category requests")
+    left, top, right, bottom = 100, 140, CANVAS["width"] - 90, CANVAS["height"] - 90
+    draw.rectangle((left, top, right, bottom), outline=(185, 191, 191), width=2, fill=(241, 243, 240))
+    boundaries = load_boundaries()
+    geo = valid_geo(df)
+    if not clusters_path.exists() or geo.empty:
+        draw.text((left + 40, top + 40), "No repeat clusters available.", fill=CANVAS["ink"], font=font(24, True))
+        img.save(path)
+        return
+    clusters = pd.read_csv(clusters_path).dropna(subset=["lat_bin_approx_100m", "lon_bin_approx_100m"])
+    extent = boundary_extent(boundaries, geo)
+    project = make_projector(extent, (left, top, right, bottom))
+    draw_boundary_backdrop(draw, boundaries, project, fill=(235, 238, 235), outline=(198, 203, 201), width=1)
+    for _, row in clusters.head(350).iterrows():
+        x, y = project(row["lon_bin_approx_100m"], row["lat_bin_approx_100m"])
+        radius = min(22, 3 + math.sqrt(row["cluster_request_count"]) * 2.5)
+        draw.ellipse((x - radius, y - radius, x + radius, y + radius), fill=(160, 69, 88), outline=(255, 255, 255), width=1)
+    draw.text((left, bottom + 22), f"Top {min(len(clusters), 350):,} repeat clusters drawn from {len(clusters):,} detected clusters.", fill=CANVAS["muted"], font=font(18))
     img.save(path)
 
 
@@ -180,7 +306,8 @@ def main() -> None:
     draw_map(df[df["standardized_category"].isin(["Drainage / Flooding", "Water", "Sewer / Wastewater"])], "Drainage, Water, and Sewer Requests", MAPS / "drainage_water_sewer_requests.png", PALETTE[1])
     draw_map(df[df["standardized_category"].isin(["Road / Pothole / Bridge", "Sidewalk / Bike Lane", "Traffic Signals / Lighting"])], "Road, Sidewalk, Signal, and Lighting Requests", MAPS / "road_sidewalk_signal_requests.png", PALETTE[2])
     draw_map(df[(df["is_open"].astype(str).str.lower() == "true") | (df["is_long_resolution"].astype(str).str.lower() == "true")], "Open or Long-Resolution Requests", MAPS / "open_or_long_resolution_requests.png", PALETTE[3])
-    draw_burden_map(df, MAPS / "council_district_service_burden_screen.png")
+    draw_burden_map(df, MAPS / "council_district_service_burden_choropleth.png")
+    draw_repeat_cluster_map(df, MAPS / "repeat_location_clusters.png")
     print("Wrote static figures and maps.")
 
 

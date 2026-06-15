@@ -4,7 +4,14 @@ from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
-from project_config import CATEGORY_RULES, DATA_PROCESSED, DATA_RAW, LONG_RESOLUTION_DAYS, ensure_directories
+from project_config import (
+    CATEGORY_RULES,
+    DATA_PROCESSED,
+    DATA_RAW,
+    LONG_RESOLUTION_DAYS,
+    REPEAT_CLUSTER_MIN_COUNT,
+    ensure_directories,
+)
 
 
 RAW_FILE = DATA_RAW / "houston_311_archive_infrastructure_extract.csv"
@@ -143,6 +150,16 @@ def main() -> None:
         for status, state, closed in zip(df["status"], df["state_code_name"], df["closed_date"])
     ]
     df["is_long_resolution"] = df["resolution_days"].fillna(0) > LONG_RESOLUTION_DAYS
+    df["lat_bin_approx_100m"] = df["latitude"].round(3)
+    df["lon_bin_approx_100m"] = df["longitude"].round(3)
+    cluster_cols = [
+        "standardized_category",
+        "council_district",
+        "lat_bin_approx_100m",
+        "lon_bin_approx_100m",
+    ]
+    df["repeat_cluster_count"] = df.groupby(cluster_cols, dropna=False)["case_number"].transform("count")
+    df["is_repeat_cluster"] = df["repeat_cluster_count"] >= REPEAT_CLUSTER_MIN_COUNT
     df["month"] = df["opened_date"].dt.to_period("M").astype(str)
     df["quality_flags"] = df.apply(build_quality_flags, axis=1)
 

@@ -2,9 +2,9 @@
 
 ## Data Access and Scope
 
-V1 uses one accessible City of Houston ArcGIS archive layer. The public web map's D365 map image service returned a server error during development, so it was not used for analytical outputs.
+V2 uses one accessible City of Houston ArcGIS archive layer. The public web map's D365 map image service returned a server error during development, so it was not used for analytical outputs.
 
-The committed outputs use a June 2025 extract. Findings should be read as a V1 sample-window analysis, not a long-term trend or comprehensive historical performance audit.
+The committed outputs use an April-June 2025 extract. Findings should be read as a bounded V2 analysis, not a long-term trend or comprehensive historical performance audit.
 
 ## Classification
 
@@ -12,15 +12,17 @@ Infrastructure requests are selected and grouped with keyword rules. This is tra
 
 ## Resolution Time
 
-Resolution time is calculated from opened and closed date fields. Records with missing, negative, or far-future closed dates are excluded from median resolution calculations. The V1 long-resolution threshold is `14` days and is an analytical screening threshold, not an official SLA.
+Resolution time is calculated from opened and closed date fields. Records with missing, negative, or far-future closed dates are excluded from median resolution calculations. The V2 long-resolution threshold is `14` days and is an analytical screening threshold, not an official SLA.
 
 The `Resolve_By_Time` field is retained but not used for late-case findings because far-future values appeared in the archive extract.
 
 ## Spatial Analysis
 
-V1 does not use official council-district or neighborhood boundary polygons. Area burden is summarized from the source `Council_District` attribute and mapped with request-coordinate centroids. This is useful for screening but not a replacement for boundary-normalized GIS analysis.
+V2 uses official council-district polygons for choropleth mapping and district area estimates. However, area burden is still summarized from the source `Council_District` attribute in each 311 record rather than reassigned by point-in-polygon overlay.
 
-V1 also does not include population normalization, ACS vulnerability overlays, or formal repeat-request clustering.
+V2 does not include population normalization, ACS vulnerability overlays, or official address-level repeat-request deduplication.
+
+Repeat-location clusters use rounded coordinates and category matching. They identify candidate recurring service locations, not verified duplicate requests.
 
 ## Privacy and Interpretation
 

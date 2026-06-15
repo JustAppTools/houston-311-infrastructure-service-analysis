@@ -16,7 +16,7 @@ def run(script: str, *args: str) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the Houston 311 V1 pipeline.")
+    parser = argparse.ArgumentParser(description="Run the Houston 311 V2 pipeline.")
     parser.add_argument("--start-date", default=DEFAULT_START_DATE)
     parser.add_argument("--end-date", default=DEFAULT_END_DATE)
     parser.add_argument("--max-records", type=int, default=DEFAULT_MAX_RECORDS)
@@ -34,6 +34,7 @@ def main() -> None:
             "--max-records",
             str(args.max_records),
         )
+        run("fetch_boundaries.py")
     run("clean_311_requests.py")
     run("analyze_requests.py")
     run("make_maps.py")

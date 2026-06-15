@@ -1,57 +1,60 @@
 standardized_category,request_type,request_count
-Solid Waste / Recycling,Missed Recycling Pickup,9191
-Solid Waste / Recycling,Missed Garbage Pickup,3604
-Water,Water Leak,2251
-Traffic Signals / Lighting,Traffic Signal Maintenance,1992
-Water,Water Service,1648
-Solid Waste / Recycling,Missed Heavy Trash Pickup,1556
-Sewer / Wastewater,Sewer Wastewater,1262
-Solid Waste / Recycling,Container Replacement,1227
-Road / Pothole / Bridge,Street Condition,1222
-Road / Pothole / Bridge,Street Hazard,1149
-Drainage / Flooding,Drainage,942
-Traffic Signals / Lighting,Traffic Signs,793
-Solid Waste / Recycling,Heavy Trash Code Violation,791
-Solid Waste / Recycling,Trash Dumping or Illegal Dumpsite,785
-Solid Waste / Recycling,Container Repair,659
-Solid Waste / Recycling,New Resident Container,609
-Solid Waste / Recycling,Recycling Participation NEW,576
-Road / Pothole / Bridge,Pothole,562
-Solid Waste / Recycling,Recycling Cart Replace,338
-Water,Water Main Valve,332
-Drainage / Flooding,Water/Sewer/Drainage Billing,240
-Solid Waste / Recycling,Recycling Cart Repair,233
-Water,Water Meter,190
-Water,Water Quality,175
-Traffic Signals / Lighting,Traffic Signals,170
-Traffic Signals / Lighting,Traffic General,128
-Traffic Signals / Lighting,Traffic Markings,97
-Drainage / Flooding,Flooding,77
-Solid Waste / Recycling,Dumpster Complaint,53
-Solid Waste / Recycling,Container Placement,43
-Road / Pothole / Bridge,Traffic Bridge/Freeway Lighting,41
-Sewer / Wastewater,Sewer Manhole,40
-Road / Pothole / Bridge,Bridge and Barricade,27
-Solid Waste / Recycling,Storm Debris Collection,27
-Traffic Signals / Lighting,Lighting,16
-Traffic Signals / Lighting,Traffic Applications,15
-Water,Set Usage Water Billing,14
-Drainage / Flooding,Drainage System Violation,14
-Drainage / Flooding,Floodplain,12
-Solid Waste / Recycling,Spilled Debris,12
-Water,Water or Ground Pollution,10
-Water,Major Water Leak,9
-Road / Pothole / Bridge,Graffiti - City Bridge,8
+Solid Waste / Recycling,Missed Recycling Pickup,14064
+Solid Waste / Recycling,Missed Garbage Pickup,9583
+Water,Water Leak,7328
+Traffic Signals / Lighting,Traffic Signal Maintenance,5335
+Water,Water Service,4829
+Sewer / Wastewater,Sewer Wastewater,4008
+Solid Waste / Recycling,Missed Heavy Trash Pickup,3577
+Solid Waste / Recycling,Container Replacement,3465
+Road / Pothole / Bridge,Street Condition,3422
+Road / Pothole / Bridge,Street Hazard,3111
+Traffic Signals / Lighting,Traffic Signs,2570
+Solid Waste / Recycling,Trash Dumping or Illegal Dumpsite,2450
+Drainage / Flooding,Drainage,2379
+Solid Waste / Recycling,Heavy Trash Code Violation,2171
+Solid Waste / Recycling,Container Repair,2085
+Solid Waste / Recycling,New Resident Container,1907
+Solid Waste / Recycling,Recycling Participation NEW,1706
+Road / Pothole / Bridge,Pothole,1582
+Solid Waste / Recycling,Recycling Cart Replace,972
+Water,Water Main Valve,970
+Solid Waste / Recycling,Recycling Cart Repair,720
+Traffic Signals / Lighting,Traffic Signals,654
+Drainage / Flooding,Water/Sewer/Drainage Billing,653
+Water,Water Meter,650
+Water,Water Quality,541
+Traffic Signals / Lighting,Traffic Markings,315
+Traffic Signals / Lighting,Traffic General,269
+Solid Waste / Recycling,Dumpster Complaint,228
+Sewer / Wastewater,Sewer Manhole,173
+Drainage / Flooding,Flooding,159
+Road / Pothole / Bridge,Traffic Bridge/Freeway Lighting,140
+Solid Waste / Recycling,Container Placement,136
+Road / Pothole / Bridge,Bridge and Barricade,89
+Solid Waste / Recycling,Storm Debris Collection,70
+Traffic Signals / Lighting,Lighting,61
+Solid Waste / Recycling,Spilled Debris,48
+Traffic Signals / Lighting,Traffic Applications,38
+Water,Water or Ground Pollution,34
+Drainage / Flooding,Drainage System Violation,33
+Traffic Signals / Lighting,Traffic School Zone,33
+Water,Set Usage Water Billing,31
+Drainage / Flooding,Floodplain,25
+Road / Pothole / Bridge,Street Assessment,25
+Road / Pothole / Bridge,Graffiti - City Bridge,20
+Traffic Signals / Lighting,Traffic Safety,17
+Water,Major Water Leak,11
+Road / Pothole / Bridge,Graffiti - City Street/Curb,8
+Water,Water Playground Repair,7
+Drainage / Flooding,Poor Drainage,6
+Solid Waste / Recycling,Trash Can New,6
 Water,Weeds/Trash/Stagnant Water on Property,6
-Traffic Signals / Lighting,Traffic School Zone,6
-Water,Water Playground Repair,3
-Drainage / Flooding,Poor Drainage,3
-Road / Pothole / Bridge,Graffiti - City Street/Curb,3
-Road / Pothole / Bridge,Street Assessment,2
-Solid Waste / Recycling,Recycling Information,2
-Traffic Signals / Lighting,Traffic Safety,2
-Road / Pothole / Bridge,Malfunctioning Railroad Signal,1
+Road / Pothole / Bridge,Parking Lot Pothole,5
+Traffic Signals / Lighting,Traffic Programs,3
+Road / Pothole / Bridge,Malfunctioning Railroad Signal,3
+Solid Waste / Recycling,Automated Recycling for Business NEW,3
+Water,Minor Water Leak,3
+Solid Waste / Recycling,Recycling Information,3
+Water,Water Adjustment Board Review,2
 Sidewalk / Bike Lane,Sidewalk Repair,1
-Solid Waste / Recycling,Automated Recycling for Business NEW,1
-Road / Pothole / Bridge,Parking Lot Pothole,1
-Water,Minor Water Leak,1
